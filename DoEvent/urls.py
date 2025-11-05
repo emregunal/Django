@@ -19,7 +19,8 @@ from django.urls import path,include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('Core.urls')),
+    path('', include('Kullanıcılar.urls')),
+    path('index/', include('Core.urls')),
     path('Kullanıcılar/', include('Kullanıcılar.urls')),
     path('Akademik/', include('Akademik.urls')),
     path('Akademik/', include('Akademik.AkademikTakvim.urls')),
