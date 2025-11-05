@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.http import JsonResponse
@@ -70,10 +70,15 @@ def login_view(request):
             
             if user is not None:
                 login(request, user)
-                return redirect('/')  # Ana sayfaya yönlendir
+                return redirect('index')  # Ana sayfaya yönlendir (index ismindeki URL'e)
             else:
                 messages.error(request, 'Geçersiz kullanıcı adı veya şifre.')
         else:
             messages.error(request, 'Lütfen kullanıcı adı ve şifrenizi girin.')
     
-    return render(request, 'kullanicilar/login.html')        
+    return render(request, 'kullanicilar/login.html')
+
+def logout_view(request):
+    logout(request)
+    messages.success(request, 'Başarıyla çıkış yapıldı.')
+    return redirect('kullanicilar:login')        

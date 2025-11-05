@@ -178,7 +178,9 @@
       <div class="icon" style="font-size: 28px;">✉</div>
       <div class="user-info" id="userInfo">202303011088 - Enes Arda Canlı</div>
       <div class="dropdown" id="dropdown">
-        <button>Çıkış</button>
+        <a href="{% url 'kullanicilar:logout' %}" style="text-decoration: none; color: inherit;">
+          <button>Çıkış</button>
+        </a>
       </div>
     </div>
   </header>
