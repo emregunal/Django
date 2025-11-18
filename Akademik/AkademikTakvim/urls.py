@@ -3,5 +3,5 @@ from django.urls import path
 
 
 urlpatterns = [
-    path('canliAkademikTakvim/', views.canliAkademikTakvim),
+    path('canli-akademik-takvim/', views.canliAkademikTakvim, name='canli-akademik-takvim'),
 ]

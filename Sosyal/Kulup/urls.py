@@ -2,5 +2,5 @@ from . import views
 from django.urls import path
 
 urlpatterns = [
-    path('kulup/', views.kulup),
+    path('kulup/<int:id>/', views.kulup, name='kulup-detay'),
 ]

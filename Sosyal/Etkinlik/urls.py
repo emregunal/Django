@@ -3,5 +3,5 @@ from django.urls import path
 
 
 urlpatterns = [
-    path('etkinlik/', views.etkinlik),
+    path('etkinlik/<int:id>/', views.etkinlik, name='etkinlik-detay'),
 ]

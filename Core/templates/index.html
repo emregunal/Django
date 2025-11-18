@@ -1,238 +1,170 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Doğuştan Sosyal</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Segoe UI', sans-serif;
+{% extends 'base.html' %}
+
+{% block title %}DoğustanSosyal - Ana Sayfa{% endblock %}
+{% block page_title %}Merhaba, {{ user.username }}! 👋{% endblock %}
+{% block page_subtitle %}Bugün seni neler bekliyor bakalım?{% endblock %}
+
+{% block extra_styles %}
+<style>
+    /* Quick Actions */
+    .quick-actions {
+        margin-bottom: 40px;
     }
 
-    body {
-      background-color: #f4f4f4;
-      color: #222;
-      height: 100vh;
+    .section-title {
+        font-size: 22px;
+        font-weight: 600;
+        color: #1a202c;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
     }
 
-    /* üstteki kırmızı bar */
-    header {
-      width: 100%;
-      height: 70px;
-      background-color: #b90e0a;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 20px;
-      color: #fff;
-      position: relative;
+    .action-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 18px;
     }
 
-    /* sol kısım (logo + menü butonu) */
-    .left-section {
-      display: flex;
-      align-items: center;
-      gap: 20px;
+    .action-card {
+        background: white;
+        padding: 25px;
+        border-radius: 14px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 2px solid #e2e8f0;
+        text-decoration: none;
+        color: inherit;
     }
 
-    .menu-icon {
-      font-size: 28px;
-      cursor: pointer;
+    .action-card:hover {
+        border-color: #667eea;
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.15);
     }
 
-    .logo {
-      font-size: 22px;
-      font-weight: bold;
-      letter-spacing: 1px;
+    .action-icon {
+        font-size: 48px;
+        margin-bottom: 12px;
     }
 
-    /* sağ kısım */
-    .right-section {
-      display: flex;
-      align-items: center;
-      gap: 25px;
-      position: relative;
+    .action-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #2d3748;
     }
 
-    .icon {
-      cursor: pointer;
-      font-size: 23px;
+    /* Recent Activity */
+    .activity-section {
+        background: white;
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     }
 
-    .user-info {
-      cursor: pointer;
-      background-color: rgba(255,255,255,0.15);
-      padding: 8px 14px;
-      border-radius: 8px;
-      transition: background 0.2s;
+    .activity-list {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
     }
 
-    .user-info:hover {
-      background-color: rgba(255,255,255,0.3);
+    .activity-item {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 15px;
+        border-radius: 10px;
+        background: #f7fafc;
+        transition: all 0.2s;
     }
 
-    /* dropdown menü (çıkış) */
-    .dropdown {
-      display: none;
-      position: absolute;
-      top: 55px;
-      right: 0;
-      background: white;
-      color: black;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      width: 120px;
-      text-align: center;
+    .activity-item:hover {
+        background: #edf2f7;
     }
 
-    .dropdown.active {
-      display: block;
+    .activity-icon {
+        font-size: 32px;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: white;
+        border-radius: 12px;
     }
 
-    .dropdown button {
-      border: none;
-      background: none;
-      width: 100%;
-      padding: 10px 0;
-      cursor: pointer;
-      font-size: 15px;
+    .activity-content {
+        flex: 1;
     }
 
-    .dropdown button:hover {
-      background-color: #eee;
+    .activity-title {
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 4px;
     }
 
-    /* yan menü */
-    .sidebar {
-      position: fixed;
-      top: 70px;
-      left: 0;
-      width: 250px;
-      height: calc(100% - 70px);
-      background-color: #fff;
-      border-right: 1px solid #ddd;
-      transform: translateX(-100%);
-      transition: 0.3s;
-      overflow-y: auto;
+    .activity-time {
+        font-size: 13px;
+        color: #718096;
     }
 
-    .sidebar.active {
-      transform: translateX(0);
+    .empty-state {
+        text-align: center;
+        padding: 40px;
+        color: #718096;
     }
 
-    .sidebar ul {
-      list-style: none;
-      padding: 10px;
+    .empty-state-icon {
+        font-size: 64px;
+        margin-bottom: 15px;
     }
 
-    .sidebar li {
-      padding: 12px 15px;
-      border-radius: 8px;
-      cursor: pointer;
-      position: relative;
+    @media (max-width: 768px) {
+        .action-cards {
+            grid-template-columns: repeat(2, 1fr);
+        }
     }
+</style>
+{% endblock %}
 
-    .sidebar li:hover {
-      background-color: #f0f0f0;
-    }
-
-    .submenu {
-      display: none;
-      margin-left: 15px;
-      margin-top: 5px;
-    }
-
-    .submenu li {
-      padding: 8px 15px;
-      font-size: 14px;
-    }
-
-    .submenu.active {
-      display: block;
-    }
-
-    main {
-      margin-left: 0;
-      padding: 20px;
-      transition: margin-left 0.3s;
-    }
-
-    .sidebar.active + main {
-      margin-left: 250px;
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <div class="left-section">
-      <div class="menu-icon" id="menuBtn">&#9776;</div>
-      <div class="logo">Doğuştan Sosyal</div>
-    </div>
-
-    <div class="right-section">
-      <div class="icon">🏠︎</div>
-      <div class="icon" style="font-size: 28px;">✉</div>
-      <div class="user-info" id="userInfo">202303011088 - Enes Arda Canlı</div>
-      <div class="dropdown" id="dropdown">
-        <a href="{% url 'kullanicilar:logout' %}" style="text-decoration: none; color: inherit;">
-          <button>Çıkış</button>
+{% block content %}
+<!-- Quick Actions -->
+<div class="quick-actions">
+    <h2 class="section-title">⚡ Hızlı İşlemler</h2>
+    <div class="action-cards">
+        <a href="/Sosyal/etkinlik-oner" class="action-card">
+            <div class="action-icon">💡</div>
+            <div class="action-title">Etkinlik Öner</div>
         </a>
-      </div>
+
+        <a href="/Sosyal/kulup-oner" class="action-card">
+            <div class="action-icon">✨</div>
+            <div class="action-title">Kulüp Öner</div>
+        </a>
+
+        <a href="/Akademik/randevu-sistemi" class="action-card">
+            <div class="action-icon">📅</div>
+            <div class="action-title">Randevu Al</div>
+        </a>
+
+        <a href="/Sosyal/duyurular" class="action-card">
+            <div class="action-icon">📢</div>
+            <div class="action-title">Duyurular</div>
+        </a>
     </div>
-  </header>
+</div>
 
-  <div class="sidebar" id="sidebar">
-    <ul>
-      <li id="takvim">Takvim ▸</li>
-      <ul class="submenu" id="takvimSub">
-        <li>Devamsızlık Takvimi</li>
-        <li>Akademik Takvim</li>
-      </ul>
-
-      <li id="kulup">Kulüpler ▸</li>
-      <ul class="submenu" id="kulupSub">
-        <li>Kulüplerim</li>
-        <li>Kulüp Öner</li>
-      </ul>
-
-      <li>Etkinlikler</li>
-      <li>Randevu</li>
-    </ul>
-  </div>
-
-  <main>
-    
-  </main>
-
-  <script>
-    const menuBtn = document.getElementById('menuBtn');
-    const sidebar = document.getElementById('sidebar');
-    const userInfo = document.getElementById('userInfo');
-    const dropdown = document.getElementById('dropdown');
-    const takvim = document.getElementById('takvim');
-    const kulup = document.getElementById('kulup');
-    const takvimSub = document.getElementById('takvimSub');
-    const kulupSub = document.getElementById('kulupSub');
-
-    menuBtn.onclick = () => {
-      sidebar.classList.toggle('active');
-    };
-
-    userInfo.onclick = () => {
-      dropdown.classList.toggle('active');
-    };
-
-    takvim.onclick = () => {
-      takvimSub.classList.toggle('active');
-    };
-
-    kulup.onclick = () => {
-      kulupSub.classList.toggle('active');
-    };
-  </script>
-</body>
-</html>
+<!-- Recent Activity -->
+<div class="activity-section">
+    <h2 class="section-title">🔥 Son Aktiviteler</h2>
+    <div class="activity-list">
+        <div class="empty-state">
+            <div class="empty-state-icon">😴</div>
+            <p>Henüz herhangi bir aktivite yok.</p>
+            <p style="font-size: 14px; margin-top: 8px;">Etkinliklere katılarak başlayabilirsin!</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

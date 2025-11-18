@@ -1,11 +1,347 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ogretim Gorevlisi Randevu</title>
-</head>
-<body>
-    <h1>Ogretim Gorevlisi Randevu Sayfası</h1>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}Randevu Sistemi - DoğustanSosyal{% endblock %}
+{% block page_title %}📝 Randevu Sistemi{% endblock %}
+{% block page_subtitle %}Öğretmenlerinle kolayca randevu al!{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .appointment-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        animation: fadeInUp 0.6s ease;
+    }
+
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .appointments-list {
+        background: white;
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .create-appointment {
+        background: white;
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .section-title {
+        font-size: 22px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .appointment-card {
+        background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+        padding: 20px;
+        border-radius: 15px;
+        margin-bottom: 15px;
+        border-left: 4px solid #667eea;
+        transition: all 0.3s;
+        cursor: pointer;
+    }
+
+    .appointment-card:hover {
+        transform: translateX(5px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .appointment-instructor {
+        font-size: 18px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 10px;
+    }
+
+    .appointment-info {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        font-size: 14px;
+        color: #666;
+    }
+
+    .appointment-info-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .appointment-status {
+        display: inline-block;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        margin-top: 10px;
+    }
+
+    .status-pending {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .status-approved {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .status-rejected {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 8px;
+        color: #333;
+        font-weight: 500;
+        font-size: 14px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        font-size: 14px;
+        transition: all 0.3s;
+        background: #f8f9fa;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+        background: white;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    }
+
+    select.form-control {
+        cursor: pointer;
+    }
+
+    textarea.form-control {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .btn-create {
+        width: 100%;
+        padding: 14px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-create:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+    }
+
+    .btn-cancel {
+        width: 48%;
+        padding: 10px;
+        background: #e74c3c;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin-top: 10px;
+    }
+
+    .btn-cancel:hover {
+        background: #c0392b;
+        transform: translateY(-2px);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #999;
+    }
+
+    .empty-state-icon {
+        font-size: 48px;
+        margin-bottom: 15px;
+    }
+
+    @media (max-width: 768px) {
+        .appointment-container {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="appointment-container">
+    <div class="appointments-list">
+        <h2 class="section-title">📋 Randevularım</h2>
+        
+        {% if randevular %}
+            {% for randevu in randevular %}
+            <div class="appointment-card">
+                <div class="appointment-instructor">{{ randevu.ogretmen.unvan }} {{ randevu.ogretmen.kullanici.get_full_name }}</div>
+                <div class="appointment-info">
+                    <div class="appointment-info-item">
+                        📅 <strong>Tarih:</strong> {{ randevu.tarih|date:"d F Y, l" }}
+                    </div>
+                    <div class="appointment-info-item">
+                        🕐 <strong>Saat:</strong> {{ randevu.baslangic_saati|time:"H:i" }} - {{ randevu.bitis_saati|time:"H:i" }}
+                    </div>
+                    {% if randevu.ogretmen.ofis %}
+                    <div class="appointment-info-item">
+                        📍 <strong>Yer:</strong> {{ randevu.ogretmen.ofis }}
+                    </div>
+                    {% endif %}
+                    <div class="appointment-info-item">
+                        📝 <strong>Konu:</strong> {{ randevu.konu }}
+                    </div>
+                    {% if randevu.aciklama %}
+                    <div class="appointment-info-item" style="margin-top: 10px; color: #666;">
+                        {{ randevu.aciklama }}
+                    </div>
+                    {% endif %}
+                </div>
+                <span class="appointment-status {% if randevu.durum == 'onaylandi' %}status-approved{% elif randevu.durum == 'reddedildi' %}status-rejected{% elif randevu.durum == 'tamamlandi' %}status-completed{% else %}status-pending{% endif %}">
+                    {% if randevu.durum == 'onaylandi' %}✓ Onaylandı
+                    {% elif randevu.durum == 'reddedildi' %}✗ Reddedildi
+                    {% elif randevu.durum == 'tamamlandi' %}✓ Tamamlandı
+                    {% elif randevu.durum == 'iptal' %}✗ İptal Edildi
+                    {% else %}⏱ Beklemede{% endif %}
+                </span>
+                {% if randevu.durum == 'bekliyor' or randevu.durum == 'onaylandi' %}
+                <br>
+                <button class="btn-cancel" onclick="alert('İptal özelliği yakında eklenecek!')">İptal Et</button>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+            <div style="text-align: center; padding: 60px 40px; background: white; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); margin-bottom: 20px;">
+                <div style="font-size: 64px; margin-bottom: 20px;">📅</div>
+                <h3 style="font-size: 24px; color: #333; margin-bottom: 10px;">Henüz Randevu Bulunmuyor</h3>
+                <p style="color: #999; font-size: 16px;">Yeni randevu oluşturmak için sağdaki formu kullanabilirsiniz</p>
+            </div>
+        {% endif %}
+        
+        <div style="display:none;">
+        <div class="appointment-card">
+            <div class="appointment-instructor">Örnek</div>
+            <div class="appointment-info">
+                <div class="appointment-info-item">
+                    🕐 <strong>Saat:</strong> 15:30 - 16:00
+                </div>
+                <div class="appointment-info-item">
+                    📍 <strong>Yer:</strong> C Blok, Kat 1, Oda 105
+                </div>
+                <div class="appointment-info-item">
+                    📝 <strong>Konu:</strong> Ödev değerlendirmesi
+                </div>
+            </div>
+            <span class="appointment-status status-approved">✓ Onaylandı</span>
+        </div>
+    </div>
+
+    <div class="create-appointment">
+        <h2 class="section-title">➕ Yeni Randevu Oluştur</h2>
+        
+        <form id="appointmentForm">
+            <div class="form-group">
+                <label class="form-label" for="instructor">Öğretim Görevlisi</label>
+                <select id="instructor" class="form-control" required>
+                    <option value="">Seçiniz...</option>
+                    <option value="1">Prof. Dr. Ahmet Yılmaz</option>
+                    <option value="2">Doç. Dr. Ayşe Demir</option>
+                    <option value="3">Dr. Öğr. Üyesi Mehmet Kaya</option>
+                    <option value="4">Dr. Öğr. Üyesi Fatma Şahin</option>
+                    <option value="5">Öğr. Gör. Ali Öztürk</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="date">Tarih</label>
+                <input type="date" id="date" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="time">Saat</label>
+                <select id="time" class="form-control" required>
+                    <option value="">Seçiniz...</option>
+                    <option value="09:00">09:00 - 09:30</option>
+                    <option value="09:30">09:30 - 10:00</option>
+                    <option value="10:00">10:00 - 10:30</option>
+                    <option value="10:30">10:30 - 11:00</option>
+                    <option value="11:00">11:00 - 11:30</option>
+                    <option value="11:30">11:30 - 12:00</option>
+                    <option value="13:00">13:00 - 13:30</option>
+                    <option value="13:30">13:30 - 14:00</option>
+                    <option value="14:00">14:00 - 14:30</option>
+                    <option value="14:30">14:30 - 15:00</option>
+                    <option value="15:00">15:00 - 15:30</option>
+                    <option value="15:30">15:30 - 16:00</option>
+                    <option value="16:00">16:00 - 16:30</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="subject">Konu</label>
+                <textarea id="subject" class="form-control" placeholder="Randevu konusunu kısaca açıklayın..." required></textarea>
+            </div>
+
+            <button type="submit" class="btn-create">Randevu Oluştur</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.getElementById('appointmentForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const instructor = document.getElementById('instructor').value;
+        const date = document.getElementById('date').value;
+        const time = document.getElementById('time').value;
+        const subject = document.getElementById('subject').value;
+        
+        if (instructor && date && time && subject) {
+            alert('Randevu talebiniz oluşturuldu! Öğretim görevlisi tarafından onaylandığında bildirim alacaksınız.');
+            this.reset();
+        }
+    });
+
+    document.querySelectorAll('.btn-cancel').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (confirm('Bu randevuyu iptal etmek istediğinize emin misiniz?')) {
+                this.closest('.appointment-card').style.opacity = '0.5';
+                alert('Randevu iptal edildi.');
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -3,5 +3,5 @@ from django.urls import path
 
 
 urlpatterns = [
-    path('kulupOner/', views.kulupOner),
+    path('kulup-oner/', views.kulupOner, name='kulup-oner'),
 ]

@@ -1,11 +1,302 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Devamsizlik Takvimi</title>
-</head>
-<body>
-    <h1>Devamsizlik Takvimi</h1>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}Devamsızlık Takvimi - DoğustanSosyal{% endblock %}
+{% block page_title %}📊 Devamsızlık Takvimi{% endblock %}
+{% block page_subtitle %}Ders devamsızlık durumunu kontrol et!{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .attendance-container {
+        background: white;
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        animation: fadeInUp 0.6s ease;
+    }
+
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 40px;
+    }
+
+    .stat-card {
+        background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+        padding: 25px;
+        border-radius: 15px;
+        text-align: center;
+        transition: all 0.3s;
+        border: 2px solid transparent;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        border-color: #667eea;
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.2);
+    }
+
+    .stat-number {
+        font-size: 36px;
+        font-weight: bold;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 10px;
+    }
+
+    .stat-label {
+        color: #666;
+        font-size: 14px;
+    }
+
+    .courses-section {
+        margin-top: 30px;
+    }
+
+    .section-title {
+        font-size: 22px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .course-list {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .course-card {
+        background: white;
+        border: 2px solid #f0f0f0;
+        padding: 25px;
+        border-radius: 15px;
+        transition: all 0.3s;
+        cursor: pointer;
+    }
+
+    .course-card:hover {
+        border-color: #667eea;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .course-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .course-name {
+        font-size: 20px;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .course-code {
+        color: #667eea;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .attendance-bar-container {
+        margin-bottom: 15px;
+    }
+
+    .attendance-bar-label {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        font-size: 14px;
+    }
+
+    .attendance-bar {
+        width: 100%;
+        height: 20px;
+        background: #f0f0f0;
+        border-radius: 10px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .attendance-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        border-radius: 10px;
+        transition: width 0.5s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 12px;
+        font-weight: bold;
+    }
+
+    .attendance-fill.warning {
+        background: linear-gradient(90deg, #f39c12 0%, #e67e22 100%);
+    }
+
+    .attendance-fill.danger {
+        background: linear-gradient(90deg, #e74c3c 0%, #c0392b 100%);
+    }
+
+    .attendance-details {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+        margin-top: 15px;
+    }
+
+    .detail-item {
+        text-align: center;
+        padding: 12px;
+        background: #f8f9fa;
+        border-radius: 10px;
+    }
+
+    .detail-value {
+        font-size: 24px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .detail-label {
+        font-size: 12px;
+        color: #666;
+        margin-top: 5px;
+    }
+
+    .warning-badge {
+        background: #fff3cd;
+        color: #856404;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .danger-badge {
+        background: #f8d7da;
+        color: #721c24;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .success-badge {
+        background: #d4edda;
+        color: #155724;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="attendance-container">
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">100%</div>
+            <div class="stat-label">Genel Devam Oranı</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">0</div>
+            <div class="stat-label">Toplam Ders</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">0</div>
+            <div class="stat-label">Toplam Devam</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">0</div>
+            <div class="stat-label">Toplam Devamsızlık</div>
+        </div>
+    </div>
+
+    <div class="courses-section">
+        <h2 class="section-title">📚 Ders Bazlı Devamsızlık</h2>
+        <div class="course-list">
+            {% if ders_istatistikleri %}
+                {% for istatistik in ders_istatistikleri %}
+                <div class="course-card">
+                    <div class="course-header">
+                        <div>
+                            <div class="course-name">{{ istatistik.ders.ders_adi }}</div>
+                            <div class="course-code">{{ istatistik.ders.ders_kodu }}</div>
+                        </div>
+                        <span class="{% if istatistik.yuzde < 70 %}danger-badge{% elif istatistik.yuzde < 85 %}warning-badge{% else %}success-badge{% endif %}">
+                            {% if istatistik.yuzde < 70 %}⚠ TEHLİKE{% elif istatistik.yuzde < 85 %}⚠ Dikkat{% else %}✓ Güvenli{% endif %}
+                        </span>
+                    </div>
+                    <div class="attendance-bar-container">
+                        <div class="attendance-bar-label">
+                            <span>Devam Oranı</span>
+                            <span style="color: {% if istatistik.yuzde < 70 %}#e74c3c{% elif istatistik.yuzde < 85 %}#f39c12{% else %}#667eea{% endif %}; font-weight: 600;">{{ istatistik.yuzde }}%</span>
+                        </div>
+                        <div class="attendance-bar">
+                            <div class="attendance-fill {% if istatistik.yuzde < 70 %}danger{% elif istatistik.yuzde < 85 %}warning{% endif %}" style="width: {{ istatistik.yuzde }}%;">{{ istatistik.yuzde }}%</div>
+                        </div>
+                    </div>
+                    <div class="attendance-details">
+                        <div class="detail-item">
+                            <div class="detail-value">14</div>
+                            <div class="detail-label">Toplam Ders</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-value">{{ istatistik.ders|add:istatistik.mazaretsiz }}</div>
+                            <div class="detail-label">Katıldı</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-value">{{ istatistik.toplam_devamsizlik }}</div>
+                            <div class="detail-label">Devamsız</div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div style="text-align: center; padding: 60px 40px; background: white; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.08);">
+                    <div style="font-size: 64px; margin-bottom: 20px;">📊</div>
+                    <h3 style="font-size: 24px; color: #333; margin-bottom: 10px;">Henüz Ders Kaydı Bulunmuyor</h3>
+                    <p style="color: #999; font-size: 16px;">Dersleriniz eklendiğinde devamsızlık takibi burada görünecek</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Animate progress bars on load
+    window.addEventListener('load', () => {
+        document.querySelectorAll('.attendance-fill').forEach(bar => {
+            const width = bar.style.width;
+            bar.style.width = '0%';
+            setTimeout(() => {
+                bar.style.width = width;
+            }, 100);
+        });
+    });
+</script>
+{% endblock %}
