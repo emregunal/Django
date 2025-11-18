@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}DoğustanSosyal{% endblock %}</title>
+    <title>{% block title %}Doğuştan Sosyal{% endblock %}</title>
     <style>
         * {
             margin: 0;
@@ -19,14 +19,16 @@
             min-height: 100vh;
         }
 
-        /* Modern Navbar */
+        /* Ultra Modern Navbar */
         .navbar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
             padding: 0;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05);
             position: sticky;
             top: 0;
             z-index: 1000;
+            border-bottom: 1px solid rgba(231, 76, 60, 0.1);
         }
 
         .navbar-container {
@@ -43,21 +45,33 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            color: white;
+            color: #1a202c;
             text-decoration: none;
-            font-size: 24px;
-            font-weight: 600;
+            font-size: 22px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.02);
         }
 
         .logo-icon {
-            font-size: 32px;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            border-radius: 12px;
+            font-size: 22px;
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
         }
 
         .nav-menu {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 4px;
             list-style: none;
         }
 
@@ -69,23 +83,50 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 10px 18px;
-            color: rgba(255, 255, 255, 0.9);
+            padding: 10px 16px;
+            color: #4a5568;
             text-decoration: none;
             border-radius: 10px;
             transition: all 0.3s ease;
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 500;
             cursor: pointer;
+            position: relative;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%) scaleX(0);
+            width: 80%;
+            height: 2px;
+            background: linear-gradient(90deg, #e74c3c, #c0392b);
+            transition: transform 0.3s ease;
+            border-radius: 2px;
         }
 
         .nav-link:hover {
-            background: rgba(255, 255, 255, 0.15);
-            color: white;
+            color: #e74c3c;
+            background: rgba(231, 76, 60, 0.05);
+        }
+
+        .nav-link:hover::after {
+            transform: translateX(-50%) scaleX(1);
+        }
+
+        .nav-link.active {
+            color: #e74c3c;
+            background: rgba(231, 76, 60, 0.1);
+        }
+
+        .nav-link.active::after {
+            transform: translateX(-50%) scaleX(1);
         }
 
         .nav-icon {
-            font-size: 20px;
+            font-size: 18px;
         }
 
         /* Dropdown Menu */
@@ -136,7 +177,7 @@
 
         .dropdown-link:hover {
             background: #f7fafc;
-            color: #667eea;
+            color: #e74c3c;
             transform: translateX(4px);
         }
 
@@ -155,39 +196,43 @@
         .user-section {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 12px;
         }
 
         .notification-icon {
             position: relative;
-            font-size: 22px;
+            font-size: 20px;
             cursor: pointer;
-            color: rgba(255, 255, 255, 0.9);
+            color: #4a5568;
             transition: all 0.3s;
-            padding: 8px;
-            border-radius: 8px;
+            padding: 10px;
+            border-radius: 10px;
+            background: transparent;
         }
 
         .notification-icon:hover {
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(231, 76, 60, 0.1);
+            color: #e74c3c;
             transform: scale(1.05);
         }
 
         .notification-badge {
             position: absolute;
-            top: 4px;
-            right: 4px;
-            background: #ff6b6b;
+            top: 6px;
+            right: 6px;
+            background: #e74c3c;
             color: white;
-            width: 18px;
+            min-width: 18px;
             height: 18px;
-            border-radius: 50%;
-            font-size: 11px;
+            border-radius: 10px;
+            font-size: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 600;
-            border: 2px solid #667eea;
+            font-weight: 700;
+            padding: 0 5px;
+            border: 2px solid white;
+            box-shadow: 0 2px 8px rgba(231, 76, 60, 0.4);
         }
 
         .user-profile {
@@ -197,32 +242,37 @@
             gap: 10px;
             cursor: pointer;
             padding: 6px 12px 6px 6px;
-            border-radius: 25px;
+            border-radius: 12px;
             transition: all 0.3s;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(231, 76, 60, 0.08);
+            border: 1px solid rgba(231, 76, 60, 0.15);
         }
 
         .user-profile:hover {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(231, 76, 60, 0.12);
+            border-color: rgba(231, 76, 60, 0.25);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.15);
         }
 
         .user-avatar {
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            background: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #667eea;
-            font-weight: 600;
-            font-size: 16px;
+            color: white;
+            font-weight: 700;
+            font-size: 15px;
+            box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
         }
 
         .user-name {
-            color: white;
+            color: #2d3748;
             font-size: 14px;
-            font-weight: 500;
+            font-weight: 600;
         }
 
         .user-dropdown {
@@ -258,7 +308,7 @@
 
         .dropdown-item:hover {
             background: #f7fafc;
-            color: #667eea;
+            color: #e74c3c;
         }
 
         /* Main Content */
@@ -287,13 +337,24 @@
         /* Mobile Menu */
         .mobile-menu-btn {
             display: none;
-            background: rgba(255, 255, 255, 0.15);
-            border: none;
-            color: white;
-            padding: 10px;
-            border-radius: 8px;
+            background: transparent;
+            border: 2px solid #e2e8f0;
+            color: #4a5568;
+            padding: 8px;
+            border-radius: 10px;
             cursor: pointer;
-            font-size: 24px;
+            font-size: 22px;
+            transition: all 0.3s;
+            width: 40px;
+            height: 40px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mobile-menu-btn:hover {
+            background: rgba(231, 76, 60, 0.1);
+            border-color: #e74c3c;
+            color: #e74c3c;
         }
 
         @media (max-width: 768px) {
@@ -306,12 +367,15 @@
                 left: -100%;
                 top: 70px;
                 flex-direction: column;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                background: white;
                 width: 100%;
                 padding: 20px;
                 transition: left 0.3s;
                 align-items: flex-start;
                 gap: 0;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+                max-height: calc(100vh - 70px);
+                overflow-y: auto;
             }
 
             .nav-menu.active {
@@ -325,6 +389,12 @@
 
             .nav-link {
                 width: 100%;
+                color: #4a5568;
+            }
+
+            .nav-link:hover {
+                background: rgba(231, 76, 60, 0.1);
+                color: #e74c3c;
             }
 
             .dropdown-content {
@@ -369,35 +439,34 @@
         <div class="navbar-container">
             <a href="/" class="logo">
                 <span class="logo-icon">🎓</span>
-                <span>DoğustanSosyal</span>
+                <span>Doğuştan Sosyal</span>
             </a>
 
             <ul class="nav-menu" id="navMenu">
                 <li class="nav-item">
                     <a href="/" class="nav-link">
-                        <span class="nav-icon">🏠</span>
                         <span>Ana Sayfa</span>
                     </a>
                 </li>
 
                 <li class="nav-item dropdown">
                     <div class="nav-link">
-                        <span class="nav-icon">📚</span>
                         <span>Akademik</span>
                     </div>
                     <div class="dropdown-content">
-                        <a href="/Akademik/canli-akademik-takvim" class="dropdown-link">
-                            📅 Akademik Takvim
+                        <a href="/Akademik/canli-akademik-takvim/" class="dropdown-link">
+                            Akademik Takvim
                         </a>
                         <a href="/Akademik/devamsizlik-takvimi" class="dropdown-link">
-                            📊 Devamsızlık Takvimi
+                            Devamsızlık Takvimi
                         </a>
-                        <a href="/Akademik/randevu-sistemi" class="dropdown-link">
-                            📝 Randevu Sistemi
+                        <a href="/Akademik/randevu-sistemi/" class="dropdown-link">
+                            Randevu Sistemi
                         </a>
                     </div>
                 </li>
 
+                <!-- SOSYAL KISMI DEVRE DIŞI - Aktif etmek için bu yorumu kaldır
                 <li class="nav-item dropdown">
                     <div class="nav-link">
                         <span class="nav-icon">🎉</span>
@@ -421,20 +490,16 @@
                         </a>
                     </div>
                 </li>
+                -->
             </ul>
 
             <div class="user-section">
-                <div class="notification-icon">
-                    🔔
-                    <span class="notification-badge">3</span>
-                </div>
-
                 <div class="user-profile" id="userProfile">
                     <div class="user-avatar">{{ user.username.0|upper|default:"U" }}</div>
                     <span class="user-name">{{ user.username }}</span>
                     <div class="user-dropdown" id="userDropdown">
                         <a href="{% url 'kullanicilar:logout' %}" class="dropdown-item">
-                            🚪 Çıkış Yap
+                            Çıkış Yap
                         </a>
                     </div>
                 </div>
@@ -447,7 +512,7 @@
     <!-- Main Content -->
     <div class="main-content">
         <div class="page-header">
-            <h1 class="page-title">{% block page_title %}DoğustanSosyal{% endblock %}</h1>
+            <h1 class="page-title">{% block page_title %}Doğuştan Sosyal{% endblock %}</h1>
             <p class="page-subtitle">{% block page_subtitle %}{% endblock %}</p>
         </div>
 

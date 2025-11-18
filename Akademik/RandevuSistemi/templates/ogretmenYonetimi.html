@@ -1,0 +1,254 @@
+{% extends "base.html" %}
+
+{% block title %}Öğretmen Yönetimi - DoğustanSosyal{% endblock %}
+{% block page_title %}👨‍🏫 Öğretmen Yönetimi{% endblock %}
+{% block page_subtitle %}Öğretim görevlilerini görüntüle ve ekle{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .teacher-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        animation: fadeInUp 0.6s ease;
+    }
+
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .section-box {
+        background: white;
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .section-title {
+        font-size: 22px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 8px;
+        color: #333;
+        font-weight: 500;
+        font-size: 14px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        font-size: 14px;
+        transition: all 0.3s;
+        background: #f8f9fa;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+        background: white;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    }
+
+    select.form-control {
+        cursor: pointer;
+    }
+
+    .form-hint {
+        font-size: 12px;
+        color: #666;
+        margin-top: 4px;
+    }
+
+    .btn-submit {
+        width: 100%;
+        padding: 14px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+    }
+
+    .teacher-list {
+        max-height: 600px;
+        overflow-y: auto;
+    }
+
+    .teacher-card {
+        background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+        padding: 20px;
+        border-radius: 15px;
+        margin-bottom: 15px;
+        border-left: 4px solid #667eea;
+        transition: all 0.3s;
+    }
+
+    .teacher-card:hover {
+        transform: translateX(5px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .teacher-name {
+        font-size: 18px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 10px;
+    }
+
+    .teacher-info {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        font-size: 14px;
+        color: #666;
+    }
+
+    .teacher-info-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 40px;
+        color: #999;
+    }
+
+    .empty-state-icon {
+        font-size: 64px;
+        margin-bottom: 20px;
+    }
+
+    @media (max-width: 768px) {
+        .teacher-container {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="teacher-container">
+    <!-- Öğretmen Ekleme Formu -->
+    <div class="section-box">
+        <h2 class="section-title">➕ Yeni Öğretmen Ekle</h2>
+        
+        <form method="POST" action="{% url 'ogretmen-yonetimi' %}">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label class="form-label" for="user_id">Kullanıcı</label>
+                <select name="user_id" id="user_id" class="form-control" required>
+                    <option value="">Seçiniz...</option>
+                    {% for user in ogretmen_olmayan_kullanicilar %}
+                    <option value="{{ user.id }}">{{ user.get_full_name }} (@{{ user.username }})</option>
+                    {% endfor %}
+                </select>
+                <div class="form-hint">* Sadece staff yetkisi olan kullanıcılar listelenir</div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="unvan">Ünvan</label>
+                <select name="unvan" id="unvan" class="form-control" required>
+                    <option value="">Seçiniz...</option>
+                    <option value="Prof. Dr.">Prof. Dr.</option>
+                    <option value="Doç. Dr.">Doç. Dr.</option>
+                    <option value="Dr. Öğr. Üyesi">Dr. Öğr. Üyesi</option>
+                    <option value="Öğr. Gör.">Öğr. Gör.</option>
+                    <option value="Öğr. Gör. Dr.">Öğr. Gör. Dr.</option>
+                    <option value="Arş. Gör.">Arş. Gör.</option>
+                    <option value="Arş. Gör. Dr.">Arş. Gör. Dr.</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="bolum">Bölüm</label>
+                <input type="text" name="bolum" id="bolum" class="form-control" placeholder="Örn: Bilgisayar Mühendisliği" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="ofis">Ofis (İsteğe Bağlı)</label>
+                <input type="text" name="ofis" id="ofis" class="form-control" placeholder="Örn: A Blok, Kat 3, Oda 305">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="telefon">Telefon (İsteğe Bağlı)</label>
+                <input type="tel" name="telefon" id="telefon" class="form-control" placeholder="Örn: +90 555 123 4567">
+            </div>
+            
+            <button type="submit" class="btn-submit">➕ Öğretmen Ekle</button>
+        </form>
+    </div>
+
+    <!-- Öğretmen Listesi -->
+    <div class="section-box">
+        <h2 class="section-title">
+            📋 Kayıtlı Öğretmenler
+            {% if tum_ogretmenler %}
+            <span style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 4px 12px; border-radius: 20px; font-size: 14px; font-weight: 600;">{{ tum_ogretmenler|length }}</span>
+            {% endif %}
+        </h2>
+        
+        <div class="teacher-list">
+            {% if tum_ogretmenler %}
+                {% for ogretmen in tum_ogretmenler %}
+                <div class="teacher-card">
+                    <div class="teacher-name">
+                        {{ ogretmen.unvan }} {{ ogretmen.kullanici.get_full_name }}
+                    </div>
+                    <div class="teacher-info">
+                        <div class="teacher-info-item">
+                            👤 <strong>Kullanıcı:</strong> @{{ ogretmen.kullanici.username }}
+                        </div>
+                        <div class="teacher-info-item">
+                            🏢 <strong>Bölüm:</strong> {{ ogretmen.bolum }}
+                        </div>
+                        {% if ogretmen.ofis %}
+                        <div class="teacher-info-item">
+                            📍 <strong>Ofis:</strong> {{ ogretmen.ofis }}
+                        </div>
+                        {% endif %}
+                        {% if ogretmen.telefon %}
+                        <div class="teacher-info-item">
+                            📞 <strong>Telefon:</strong> {{ ogretmen.telefon }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">👨‍🏫</div>
+                    <h3 style="font-size: 24px; color: #333; margin-bottom: 10px;">Henüz Öğretmen Eklenmemiş</h3>
+                    <p style="font-size: 16px;">Sol taraftaki formu kullanarak öğretmen ekleyebilirsiniz</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

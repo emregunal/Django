@@ -1,21 +1,15 @@
 {% extends "base.html" %}
 
 {% block title %}Randevu Sistemi - DoğustanSosyal{% endblock %}
-{% block page_title %}📝 Randevu Sistemi{% endblock %}
+{% block page_title %}Randevu Sistemi{% endblock %}
 {% block page_subtitle %}Öğretmenlerinle kolayca randevu al!{% endblock %}
 
 {% block extra_styles %}
 <style>
     .appointment-container {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 2fr 1fr;
         gap: 30px;
-        animation: fadeInUp 0.6s ease;
-    }
-
-    @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(30px); }
-        to { opacity: 1; transform: translateY(0); }
     }
 
     .appointments-list {
@@ -23,6 +17,51 @@
         padding: 30px;
         border-radius: 20px;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Tabs */
+    .tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 25px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .tab-btn {
+        padding: 12px 24px;
+        background: transparent;
+        border: none;
+        border-bottom: 3px solid transparent;
+        color: #718096;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        position: relative;
+        bottom: -2px;
+    }
+
+    .tab-btn:hover {
+        color: #e74c3c;
+    }
+
+    .tab-btn.active {
+        color: #e74c3c;
+        border-bottom-color: #e74c3c;
+    }
+
+    .tab-content {
+        display: none;
+    }
+
+    .tab-content.active {
+        display: block;
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
     }
 
     .create-appointment {
@@ -43,18 +82,11 @@
     }
 
     .appointment-card {
-        background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+        background: linear-gradient(135deg, #e74c3c15 0%, #c0392b15 100%);
         padding: 20px;
         border-radius: 15px;
         margin-bottom: 15px;
-        border-left: 4px solid #667eea;
-        transition: all 0.3s;
-        cursor: pointer;
-    }
-
-    .appointment-card:hover {
-        transform: translateX(5px);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        border-left: 4px solid #e74c3c;
     }
 
     .appointment-instructor {
@@ -102,6 +134,11 @@
         color: #721c24;
     }
 
+    .status-canceled {
+        background: #e2e3e5;
+        color: #383d41;
+    }
+
     .form-group {
         margin-bottom: 20px;
     }
@@ -126,9 +163,9 @@
 
     .form-control:focus {
         outline: none;
-        border-color: #667eea;
+        border-color: #e74c3c;
         background: white;
-        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        box-shadow: 0 0 0 4px rgba(231, 76, 60, 0.1);
     }
 
     select.form-control {
@@ -143,7 +180,7 @@
     .btn-create {
         width: 100%;
         padding: 14px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
         color: white;
         border: none;
         border-radius: 12px;
@@ -151,12 +188,12 @@
         font-weight: 600;
         cursor: pointer;
         transition: all 0.3s;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
     }
 
     .btn-create:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        box-shadow: 0 6px 20px rgba(231, 76, 60, 0.5);
     }
 
     .btn-cancel {
@@ -193,6 +230,23 @@
         .appointment-container {
             grid-template-columns: 1fr;
         }
+
+        .appointments-list {
+            order: 2;
+        }
+
+        .create-appointment {
+            order: 1;
+        }
+
+        .tabs {
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            flex: 1;
+            min-width: 120px;
+        }
     }
 </style>
 {% endblock %}
@@ -200,148 +254,191 @@
 {% block content %}
 <div class="appointment-container">
     <div class="appointments-list">
-        <h2 class="section-title">📋 Randevularım</h2>
+        <h2 class="section-title">Randevularım</h2>
         
-        {% if randevular %}
-            {% for randevu in randevular %}
-            <div class="appointment-card">
-                <div class="appointment-instructor">{{ randevu.ogretmen.unvan }} {{ randevu.ogretmen.kullanici.get_full_name }}</div>
-                <div class="appointment-info">
-                    <div class="appointment-info-item">
-                        📅 <strong>Tarih:</strong> {{ randevu.tarih|date:"d F Y, l" }}
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="aktif" type="button">Aktif Randevular</button>
+            <button class="tab-btn" data-tab="gecmis" type="button">Geçmiş Randevular</button>
+        </div>
+
+        <!-- Aktif Randevular Tab -->
+        <div id="aktif" class="tab-content active">
+            {% if aktif_randevular %}
+                {% for randevu in aktif_randevular %}
+                <div class="appointment-card">
+                    <div class="appointment-instructor">{{ randevu.ogretmen.unvan }} {{ randevu.ogretmen.kullanici.get_full_name }}</div>
+                    <div class="appointment-info">
+                        <div class="appointment-info-item">
+                            <strong>Tarih:</strong> {{ randevu.tarih|date:"d F Y, l" }}
+                        </div>
+                        <div class="appointment-info-item">
+                            <strong>Saat:</strong> {{ randevu.baslangic_saati|time:"H:i" }} - {{ randevu.bitis_saati|time:"H:i" }}
+                        </div>
+                        {% if randevu.ogretmen.ofis %}
+                        <div class="appointment-info-item">
+                            <strong>Yer:</strong> {{ randevu.ogretmen.ofis }}
+                        </div>
+                        {% endif %}
+                        <div class="appointment-info-item">
+                            <strong>Konu:</strong> {{ randevu.konu }}
+                        </div>
+                        {% if randevu.aciklama %}
+                        <div class="appointment-info-item" style="margin-top: 10px; color: #666;">
+                            {{ randevu.aciklama }}
+                        </div>
+                        {% endif %}
                     </div>
-                    <div class="appointment-info-item">
-                        🕐 <strong>Saat:</strong> {{ randevu.baslangic_saati|time:"H:i" }} - {{ randevu.bitis_saati|time:"H:i" }}
-                    </div>
-                    {% if randevu.ogretmen.ofis %}
-                    <div class="appointment-info-item">
-                        📍 <strong>Yer:</strong> {{ randevu.ogretmen.ofis }}
-                    </div>
+                    <span class="appointment-status {% if randevu.durum == 'onaylandi' %}status-approved{% elif randevu.durum == 'reddedildi' %}status-rejected{% else %}status-pending{% endif %}">
+                        {% if randevu.durum == 'onaylandi' %}Onaylandı
+                        {% elif randevu.durum == 'reddedildi' %}Reddedildi
+                        {% else %}Beklemede{% endif %}
+                    </span>
+                    {% if randevu.durum == 'bekliyor' or randevu.durum == 'onaylandi' %}
+                    <br>
+                    <form method="POST" action="{% url 'randevu-sistemi' %}" style="display: inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="cancel">
+                        <input type="hidden" name="randevu_id" value="{{ randevu.id }}">
+                        <button type="submit" class="btn-cancel" onclick="return confirm('Bu randevuyu iptal etmek istediğinize emin misiniz?')">İptal Et</button>
+                    </form>
                     {% endif %}
-                    <div class="appointment-info-item">
-                        📝 <strong>Konu:</strong> {{ randevu.konu }}
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">📅</div>
+                    <p>Henüz aktif randevunuz bulunmuyor</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Geçmiş Randevular Tab -->
+        <div id="gecmis" class="tab-content">
+            {% if gecmis_randevular %}
+                {% for randevu in gecmis_randevular %}
+                <div class="appointment-card" style="opacity: 0.7;">
+                    <div class="appointment-instructor">{{ randevu.ogretmen.unvan }} {{ randevu.ogretmen.kullanici.get_full_name }}</div>
+                    <div class="appointment-info">
+                        <div class="appointment-info-item">
+                            <strong>Tarih:</strong> {{ randevu.tarih|date:"d F Y, l" }}
+                        </div>
+                        <div class="appointment-info-item">
+                            <strong>Saat:</strong> {{ randevu.baslangic_saati|time:"H:i" }} - {{ randevu.bitis_saati|time:"H:i" }}
+                        </div>
+                        <div class="appointment-info-item">
+                            <strong>Konu:</strong> {{ randevu.konu }}
+                        </div>
                     </div>
-                    {% if randevu.aciklama %}
-                    <div class="appointment-info-item" style="margin-top: 10px; color: #666;">
-                        {{ randevu.aciklama }}
-                    </div>
-                    {% endif %}
+                    <span class="appointment-status {% if randevu.durum == 'iptal' %}status-canceled{% elif randevu.durum == 'onaylandi' %}status-approved{% elif randevu.durum == 'reddedildi' %}status-rejected{% else %}status-pending{% endif %}">
+                        {% if randevu.durum == 'iptal' %}İptal Edildi
+                        {% elif randevu.durum == 'onaylandi' %}Tamamlandı
+                        {% elif randevu.durum == 'reddedildi' %}Reddedildi
+                        {% else %}Beklemede{% endif %}
+                    </span>
                 </div>
-                <span class="appointment-status {% if randevu.durum == 'onaylandi' %}status-approved{% elif randevu.durum == 'reddedildi' %}status-rejected{% elif randevu.durum == 'tamamlandi' %}status-completed{% else %}status-pending{% endif %}">
-                    {% if randevu.durum == 'onaylandi' %}✓ Onaylandı
-                    {% elif randevu.durum == 'reddedildi' %}✗ Reddedildi
-                    {% elif randevu.durum == 'tamamlandi' %}✓ Tamamlandı
-                    {% elif randevu.durum == 'iptal' %}✗ İptal Edildi
-                    {% else %}⏱ Beklemede{% endif %}
-                </span>
-                {% if randevu.durum == 'bekliyor' or randevu.durum == 'onaylandi' %}
-                <br>
-                <button class="btn-cancel" onclick="alert('İptal özelliği yakında eklenecek!')">İptal Et</button>
-                {% endif %}
-            </div>
-            {% endfor %}
-        {% else %}
-            <div style="text-align: center; padding: 60px 40px; background: white; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); margin-bottom: 20px;">
-                <div style="font-size: 64px; margin-bottom: 20px;">📅</div>
-                <h3 style="font-size: 24px; color: #333; margin-bottom: 10px;">Henüz Randevu Bulunmuyor</h3>
-                <p style="color: #999; font-size: 16px;">Yeni randevu oluşturmak için sağdaki formu kullanabilirsiniz</p>
-            </div>
-        {% endif %}
-        
-        <div style="display:none;">
-        <div class="appointment-card">
-            <div class="appointment-instructor">Örnek</div>
-            <div class="appointment-info">
-                <div class="appointment-info-item">
-                    🕐 <strong>Saat:</strong> 15:30 - 16:00
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">🕐</div>
+                    <p>Geçmiş randevu kaydı bulunmuyor</p>
                 </div>
-                <div class="appointment-info-item">
-                    📍 <strong>Yer:</strong> C Blok, Kat 1, Oda 105
-                </div>
-                <div class="appointment-info-item">
-                    📝 <strong>Konu:</strong> Ödev değerlendirmesi
-                </div>
-            </div>
-            <span class="appointment-status status-approved">✓ Onaylandı</span>
+            {% endif %}
         </div>
     </div>
 
     <div class="create-appointment">
-        <h2 class="section-title">➕ Yeni Randevu Oluştur</h2>
+        <h2 class="section-title">Yeni Randevu Oluştur</h2>
         
-        <form id="appointmentForm">
+        <form method="POST" action="{% url 'randevu-sistemi' %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="create">
+            
             <div class="form-group">
-                <label class="form-label" for="instructor">Öğretim Görevlisi</label>
-                <select id="instructor" class="form-control" required>
+                <label class="form-label" for="ogretmen">Öğretim Görevlisi</label>
+                <select name="ogretmen" id="ogretmen" class="form-control" required>
                     <option value="">Seçiniz...</option>
-                    <option value="1">Prof. Dr. Ahmet Yılmaz</option>
-                    <option value="2">Doç. Dr. Ayşe Demir</option>
-                    <option value="3">Dr. Öğr. Üyesi Mehmet Kaya</option>
-                    <option value="4">Dr. Öğr. Üyesi Fatma Şahin</option>
-                    <option value="5">Öğr. Gör. Ali Öztürk</option>
+                    {% for ogretmen in ogretmenler %}
+                    <option value="{{ ogretmen.id }}">{{ ogretmen.unvan }} {{ ogretmen.kullanici.get_full_name }}</option>
+                    {% endfor %}
                 </select>
             </div>
 
             <div class="form-group">
-                <label class="form-label" for="date">Tarih</label>
-                <input type="date" id="date" class="form-control" required>
+                <label class="form-label" for="tarih">Tarih</label>
+                <input type="date" name="tarih" id="tarih" class="form-control" required>
             </div>
 
             <div class="form-group">
-                <label class="form-label" for="time">Saat</label>
-                <select id="time" class="form-control" required>
-                    <option value="">Seçiniz...</option>
-                    <option value="09:00">09:00 - 09:30</option>
-                    <option value="09:30">09:30 - 10:00</option>
-                    <option value="10:00">10:00 - 10:30</option>
-                    <option value="10:30">10:30 - 11:00</option>
-                    <option value="11:00">11:00 - 11:30</option>
-                    <option value="11:30">11:30 - 12:00</option>
-                    <option value="13:00">13:00 - 13:30</option>
-                    <option value="13:30">13:30 - 14:00</option>
-                    <option value="14:00">14:00 - 14:30</option>
-                    <option value="14:30">14:30 - 15:00</option>
-                    <option value="15:00">15:00 - 15:30</option>
-                    <option value="15:30">15:30 - 16:00</option>
-                    <option value="16:00">16:00 - 16:30</option>
-                </select>
+                <label class="form-label" for="baslangic_saati">Başlangıç Saati</label>
+                <input type="time" name="baslangic_saati" id="baslangic_saati" class="form-control" required>
             </div>
 
             <div class="form-group">
-                <label class="form-label" for="subject">Konu</label>
-                <textarea id="subject" class="form-control" placeholder="Randevu konusunu kısaca açıklayın..." required></textarea>
+                <label class="form-label" for="bitis_saati">Bitiş Saati</label>
+                <input type="time" name="bitis_saati" id="bitis_saati" class="form-control" required>
             </div>
 
-            <button type="submit" class="btn-create">Randevu Oluştur</button>
+            <div class="form-group">
+                <label class="form-label" for="konu">Konu</label>
+                <input type="text" name="konu" id="konu" class="form-control" placeholder="Görüşme konusu..." required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="aciklama">Açıklama (İsteğe Bağlı)</label>
+                <textarea name="aciklama" id="aciklama" class="form-control" placeholder="Detaylı açıklama..." rows="3"></textarea>
+            </div>
+
+            <button type="submit" class="btn-create">Randevu Talebi Oluştur</button>
         </form>
     </div>
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
-<script>
-    document.getElementById('appointmentForm').addEventListener('submit', function(e) {
-        e.preventDefault();
+    // Wait for DOM to be fully loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Script loaded');
         
-        const instructor = document.getElementById('instructor').value;
-        const date = document.getElementById('date').value;
-        const time = document.getElementById('time').value;
-        const subject = document.getElementById('subject').value;
+        // Tab switching with data attribute
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        console.log('Found buttons:', tabButtons.length);
         
-        if (instructor && date && time && subject) {
-            alert('Randevu talebiniz oluşturuldu! Öğretim görevlisi tarafından onaylandığında bildirim alacaksınız.');
-            this.reset();
+        tabButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const targetTab = this.getAttribute('data-tab');
+                console.log('Clicked tab:', targetTab);
+                
+                // Remove active from all buttons and contents
+                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                
+                // Add active to clicked button and corresponding content
+                this.classList.add('active');
+                const targetContent = document.getElementById(targetTab);
+                if (targetContent) {
+                    targetContent.classList.add('active');
+                    console.log('Activated:', targetTab);
+                } else {
+                    console.error('Content not found:', targetTab);
+                }
+            });
+        });
+        
+        // Minimum tarih olarak bugünü ayarla
+        const tarihInput = document.getElementById('tarih');
+        if (tarihInput) {
+            tarihInput.min = new Date().toISOString().split('T')[0];
+        }
+        
+        // Bitiş saati başlangıç saatinden sonra olmalı
+        const baslangicInput = document.getElementById('baslangic_saati');
+        const bitisInput = document.getElementById('bitis_saati');
+        if (baslangicInput && bitisInput) {
+            baslangicInput.addEventListener('change', function() {
+                const baslangic = this.value;
+                bitisInput.min = baslangic;
+            });
         }
     });
-
-    document.querySelectorAll('.btn-cancel').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            if (confirm('Bu randevuyu iptal etmek istediğinize emin misiniz?')) {
-                this.closest('.appointment-card').style.opacity = '0.5';
-                alert('Randevu iptal edildi.');
-            }
-        });
-    });
-</script>
 {% endblock %}

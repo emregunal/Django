@@ -30,7 +30,7 @@
         cursor: pointer;
         animation: fadeInUp 0.6s ease;
         animation-fill-mode: both;
-        border-left: 5px solid #667eea;
+        border-left: 5px solid #e74c3c;
     }
 
     .announcement-card:nth-child(1) { animation-delay: 0.1s; }
@@ -59,7 +59,7 @@
     }
 
     .announcement-date {
-        color: #667eea;
+        color: #e74c3c;
         font-size: 13px;
         display: flex;
         align-items: center;
@@ -68,7 +68,7 @@
 
     .announcement-badge {
         padding: 6px 15px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
         color: white;
         border-radius: 20px;
         font-size: 12px;
@@ -117,7 +117,7 @@
                         <div class="announcement-date">📅 {{ duyuru.olusturma_tarihi|date:"d F Y, H:i" }}</div>
                     </div>
                     <span class="announcement-badge" 
-                          style="background: {% if duyuru.kategori == 'acil' %}#e74c3c{% elif duyuru.kategori == 'akademik' %}#667eea{% elif duyuru.kategori == 'sosyal' %}#f39c12{% else %}#3498db{% endif %};">
+                          style="background: {% if duyuru.kategori == 'acil' %}#e74c3c{% elif duyuru.kategori == 'akademik' %}#e74c3c{% elif duyuru.kategori == 'sosyal' %}#f39c12{% else %}#3498db{% endif %};">
                         {{ duyuru.get_kategori_display|upper }}
                     </span>
                 </div>

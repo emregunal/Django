@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}Akademik Takvim - DoğustanSosyal{% endblock %}
-{% block page_title %}📅 Akademik Takvim{% endblock %}
+{% block page_title %}Akademik Takvim{% endblock %}
 {% block page_subtitle %}2025-2026 Akademik Yılı - Sınavlar, tatiller ve önemli tarihleri takip et!{% endblock %}
 
 {% block extra_styles %}
@@ -19,9 +19,8 @@
         font-weight: 600;
         color: #1a202c;
         margin-bottom: 20px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
+        padding-left: 15px;
+        border-left: 4px solid #e74c3c;
     }
 
     /* Yaklaşan Etkinlikler */
@@ -37,7 +36,7 @@
         gap: 20px;
         padding: 20px;
         border-radius: 12px;
-        border-left: 4px solid #667eea;
+        border-left: 4px solid #e74c3c;
         background: #f7fafc;
     }
 
@@ -52,9 +51,20 @@
     }
 
     .event-icon {
-        font-size: 36px;
-        min-width: 50px;
-        text-align: center;
+        width: 8px;
+        height: 8px;
+        min-width: 8px;
+        border-radius: 50%;
+        background: #e74c3c;
+        margin-top: 8px;
+    }
+
+    .event-card.event-exam .event-icon {
+        background: #f56565;
+    }
+
+    .event-card.event-holiday .event-icon {
+        background: #48bb78;
     }
 
     .event-content {
@@ -70,7 +80,7 @@
 
     .event-date {
         font-size: 14px;
-        color: #667eea;
+        color: #e74c3c;
         margin-bottom: 8px;
         font-weight: 500;
     }
@@ -88,7 +98,7 @@
     }
 
     .event-badge {
-        background: #667eea;
+        background: #e74c3c;
         color: white;
         padding: 6px 14px;
         border-radius: 20px;
@@ -115,7 +125,7 @@
         color: #2d3748;
         margin-bottom: 15px;
         padding-left: 12px;
-        border-left: 4px solid #667eea;
+        border-left: 4px solid #e74c3c;
     }
 
     .timeline-list {
@@ -140,7 +150,7 @@
         min-width: 100px;
         font-size: 14px;
         font-weight: 600;
-        color: #667eea;
+        color: #e74c3c;
     }
 
     .timeline-content {
@@ -166,8 +176,11 @@
     }
 
     .empty-icon {
-        font-size: 64px;
-        margin-bottom: 15px;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: #e2e8f0;
+        margin: 0 auto 15px;
     }
 
     @media (max-width: 768px) {
@@ -195,22 +208,18 @@
 {% block content %}
 <!-- Yaklaşan Etkinlikler -->
 <div class="calendar-container">
-    <h2 class="section-title">🔥 Yaklaşan 60 Gün</h2>
+    <h2 class="section-title">Yaklaşan 60 Gün</h2>
     <div class="events-list">
         {% if yaklasan_etkinlikler %}
             {% for etkinlik in yaklasan_etkinlikler %}
             <div class="event-card {% if etkinlik.tip == 'sinav' %}event-exam{% elif etkinlik.tip == 'tatil' %}event-holiday{% endif %}">
-                <div class="event-icon">
-                    {% if etkinlik.tip == 'sinav' %}📝
-                    {% elif etkinlik.tip == 'tatil' %}🏖️
-                    {% else %}📅{% endif %}
-                </div>
+                <div class="event-icon"></div>
                 <div class="event-content">
                     <div class="event-title">{{ etkinlik.baslik }}</div>
                     <div class="event-date">{{ etkinlik.tarih|date:"d E Y, l" }}</div>
                     <div class="event-description">{{ etkinlik.aciklama }}</div>
                     {% if etkinlik.konum %}
-                    <div class="event-location">📍 {{ etkinlik.konum }}</div>
+                    <div class="event-location">{{ etkinlik.konum }}</div>
                     {% endif %}
                 </div>
                 <div class="event-badge">
@@ -222,7 +231,7 @@
             {% endfor %}
         {% else %}
             <div class="empty-state">
-                <div class="empty-icon">😴</div>
+                <div class="empty-icon"></div>
                 <p>Yaklaşan 60 gün içinde etkinlik yok</p>
             </div>
         {% endif %}
@@ -231,12 +240,12 @@
 
 <!-- Tüm Etkinlikler -->
 <div class="calendar-container">
-    <h2 class="section-title">📚 2025-2026 Akademik Yıl Takvimi</h2>
+    <h2 class="section-title">2025-2026 Akademik Yıl Takvimi</h2>
     
     <!-- Sınavlar -->
     {% if sinavlar %}
     <div class="category-section">
-        <h3 class="category-title">📝 Sınavlar</h3>
+        <h3 class="category-title">Sınavlar</h3>
         <div class="timeline-list">
             {% for sinav in sinavlar %}
             <div class="timeline-item">
@@ -254,7 +263,7 @@
     <!-- Tatiller -->
     {% if tatiller %}
     <div class="category-section">
-        <h3 class="category-title">🏖️ Tatiller & Resmi Günler</h3>
+        <h3 class="category-title">Tatiller & Resmi Günler</h3>
         <div class="timeline-list">
             {% for tatil in tatiller %}
             <div class="timeline-item holiday">
@@ -272,7 +281,7 @@
     <!-- Diğer Önemli Tarihler -->
     {% if diger %}
     <div class="category-section">
-        <h3 class="category-title">📌 Önemli Tarihler</h3>
+        <h3 class="category-title">Önemli Tarihler</h3>
         <div class="timeline-list">
             {% for etkinlik in diger %}
             <div class="timeline-item">

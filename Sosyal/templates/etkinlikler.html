@@ -39,8 +39,8 @@
     }
 
     .filter-btn:hover, .filter-btn.active {
-        border-color: #667eea;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-color: #e74c3c;
+        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
         color: white;
     }
 
@@ -61,7 +61,7 @@
 
     .search-input:focus {
         outline: none;
-        border-color: #667eea;
+        border-color: #e74c3c;
     }
 
     .search-icon {
@@ -104,7 +104,7 @@
     .event-image {
         width: 100%;
         height: 200px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -118,8 +118,8 @@
     .event-category {
         display: inline-block;
         padding: 5px 12px;
-        background: #e8f4fd;
-        color: #667eea;
+        background: #ffe8e8;
+        color: #e74c3c;
         border-radius: 15px;
         font-size: 12px;
         font-weight: 600;
@@ -173,7 +173,7 @@
 
     .btn-join {
         padding: 8px 20px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
         color: white;
         border: none;
         border-radius: 20px;
@@ -185,7 +185,7 @@
 
     .btn-join:hover {
         transform: scale(1.05);
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
     }
 </style>
 {% endblock %}
@@ -243,7 +243,7 @@
                 <div style="font-size: 64px; margin-bottom: 20px;">🎪</div>
                 <h3 style="font-size: 24px; color: #333; margin-bottom: 10px;">Henüz Etkinlik Bulunmuyor</h3>
                 <p style="color: #999; font-size: 16px; margin-bottom: 20px;">Yeni etkinlikler yakında eklenecek. Etkinlik önermek için aşağıdaki butona tıklayın!</p>
-                <a href="/Sosyal/etkinlik-oner/" style="display: inline-block; padding: 12px 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 25px; font-weight: 600; transition: all 0.3s;">Etkinlik Öner</a>
+                <a href="/Sosyal/etkinlik-oner/" style="display: inline-block; padding: 12px 30px; background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: white; text-decoration: none; border-radius: 25px; font-weight: 600; transition: all 0.3s;">Etkinlik Öner</a>
             </div>
         {% endif %}
     </div>
@@ -290,7 +290,7 @@
                         showToast(`"${title}" etkinliğine başarıyla katıldınız! 🎉`);
                     } else {
                         this.textContent = 'Katıl';
-                        this.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                        this.style.background = 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)';
                         this.setAttribute('data-katildi', 'false');
                         showToast('Etkinlikten ayrıldınız.');
                     }
@@ -364,7 +364,7 @@
         position: fixed;
         bottom: 30px;
         right: 30px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
         color: white;
         padding: 15px 25px;
         border-radius: 10px;

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}Devamsızlık Takvimi - DoğustanSosyal{% endblock %}
-{% block page_title %}📊 Devamsızlık Takvimi{% endblock %}
+{% block page_title %}Devamsızlık Takvimi{% endblock %}
 {% block page_subtitle %}Ders devamsızlık durumunu kontrol et!{% endblock %}
 
 {% block extra_styles %}
@@ -27,7 +27,7 @@
     }
 
     .stat-card {
-        background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+        background: linear-gradient(135deg, #e74c3c15 0%, #c0392b15 100%);
         padding: 25px;
         border-radius: 15px;
         text-align: center;
@@ -37,14 +37,14 @@
 
     .stat-card:hover {
         transform: translateY(-5px);
-        border-color: #667eea;
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.2);
+        border-color: #e74c3c;
+        box-shadow: 0 6px 20px rgba(231, 76, 60, 0.2);
     }
 
     .stat-number {
         font-size: 36px;
         font-weight: bold;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         margin-bottom: 10px;
@@ -85,7 +85,7 @@
     }
 
     .course-card:hover {
-        border-color: #667eea;
+        border-color: #e74c3c;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     }
 
@@ -103,7 +103,7 @@
     }
 
     .course-code {
-        color: #667eea;
+        color: #e74c3c;
         font-size: 14px;
         font-weight: 500;
     }
@@ -130,7 +130,7 @@
 
     .attendance-fill {
         height: 100%;
-        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(90deg, #e74c3c 0%, #c0392b 100%);
         border-radius: 10px;
         transition: width 0.5s ease;
         display: flex;
@@ -151,7 +151,7 @@
 
     .attendance-details {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(4, 1fr);
         gap: 15px;
         margin-top: 15px;
     }
@@ -210,66 +210,155 @@
         align-items: center;
         gap: 5px;
     }
+
+    /* Kaydet Buton Animasyonu */
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.2);
+        }
+        50% {
+            transform: scale(1.02);
+            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
+        }
+    }
+
+    .save-btn {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .save-btn::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(231, 76, 60, 0.1);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .save-btn:hover::before {
+        width: 300px;
+        height: 300px;
+    }
+
+    .save-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(231, 76, 60, 0.3);
+        animation: pulse 1.5s infinite;
+    }
+
+    .save-btn:active {
+        transform: scale(0.98);
+        animation: none;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="attendance-container">
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-number">100%</div>
-            <div class="stat-label">Genel Devam Oranı</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-number">0</div>
-            <div class="stat-label">Toplam Ders</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-number">0</div>
-            <div class="stat-label">Toplam Devam</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-number">0</div>
-            <div class="stat-label">Toplam Devamsızlık</div>
-        </div>
+    <!-- Ders Ekleme Formu -->
+    <div style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); padding: 30px; border-radius: 20px; margin-bottom: 30px; box-shadow: 0 4px 20px rgba(231, 76, 60, 0.3);">
+        <h2 style="color: white; margin-bottom: 20px; font-size: 24px;">Yeni Ders Ekle</h2>
+        <form method="POST" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="add_ders">
+            <div>
+                <label style="color: white; font-size: 14px; display: block; margin-bottom: 8px;">Ders Adı (Kod)</label>
+                <input type="text" name="ders_adi" placeholder="BOM361" required 
+                       style="width: 100%; padding: 12px; border: none; border-radius: 10px; font-size: 14px;">
+            </div>
+            <div>
+                <label style="color: white; font-size: 14px; display: block; margin-bottom: 8px;">Devam Zorunluluğu (%)</label>
+                <input type="number" name="devam_zorunlulugu" placeholder="70" min="0" max="100" required 
+                       style="width: 100%; padding: 12px; border: none; border-radius: 10px; font-size: 14px;">
+            </div>
+            <div>
+                <label style="color: white; font-size: 14px; display: block; margin-bottom: 8px;">Haftalık Ders Saati</label>
+                <input type="number" name="haftalik_ders_saati" placeholder="3" min="1" required 
+                       style="width: 100%; padding: 12px; border: none; border-radius: 10px; font-size: 14px;">
+            </div>
+            <div style="display: flex; align-items: flex-end;">
+                <button type="submit" class="save-btn" style="width: 100%; padding: 12px 24px; background: white; color: #e74c3c; border: none; border-radius: 10px; font-weight: 600; font-size: 16px; cursor: pointer; transition: all 0.3s;">
+                    Kaydet
+                </button>
+            </div>
+        </form>
     </div>
 
     <div class="courses-section">
-        <h2 class="section-title">📚 Ders Bazlı Devamsızlık</h2>
+        <h2 class="section-title">Ders Bazlı Devamsızlık</h2>
         <div class="course-list">
             {% if ders_istatistikleri %}
                 {% for istatistik in ders_istatistikleri %}
-                <div class="course-card">
+                <div class="course-card" id="ders-{{ istatistik.ders.id }}">
                     <div class="course-header">
-                        <div>
+                        <div style="flex: 1;">
                             <div class="course-name">{{ istatistik.ders.ders_adi }}</div>
-                            <div class="course-code">{{ istatistik.ders.ders_kodu }}</div>
+                            <div class="course-code">{{ istatistik.ders.ders_kodu }} • {{ istatistik.ders.haftalik_ders_saati }} saat/hafta</div>
                         </div>
-                        <span class="{% if istatistik.yuzde < 70 %}danger-badge{% elif istatistik.yuzde < 85 %}warning-badge{% else %}success-badge{% endif %}">
-                            {% if istatistik.yuzde < 70 %}⚠ TEHLİKE{% elif istatistik.yuzde < 85 %}⚠ Dikkat{% else %}✓ Güvenli{% endif %}
-                        </span>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <!-- Devamsızlık Ekleme Formu -->
+                            <form method="POST" action="#ders-{{ istatistik.ders.id }}" style="display: flex; gap: 10px; align-items: center;">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="add_devamsizlik">
+                                <input type="hidden" name="ders_id" value="{{ istatistik.ders.id }}">
+                                <select name="devamsiz_saat" required style="padding: 8px 12px; border: 2px solid #e74c3c; border-radius: 8px; font-size: 14px; cursor: pointer;">
+                                    <option value="">Saat Seç</option>
+                                    {% for i in "123456" %}
+                                    <option value="{{ forloop.counter }}">+{{ forloop.counter }} saat</option>
+                                    {% endfor %}
+                                    {% for i in "123456" %}
+                                    <option value="-{{ forloop.counter }}">-{{ forloop.counter }} saat</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit" style="padding: 8px 16px; background: #e74c3c; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; white-space: nowrap;">
+                                    📝 Devamsızlık Ekle/Çıkar
+                                </button>
+                            </form>
+                            <!-- Ders Silme Butonu -->
+                            <form method="POST" onsubmit="return confirm('{{ istatistik.ders.ders_adi }} dersini silmek istediğinize emin misiniz?');">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="delete_ders">
+                                <input type="hidden" name="ders_id" value="{{ istatistik.ders.id }}">
+                                <button type="submit" style="padding: 8px 16px; background: #e74c3c; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: all 0.3s; box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);" onmouseover="this.style.background='#c0392b'; this.style.boxShadow='0 4px 12px rgba(231, 76, 60, 0.4)';" onmouseout="this.style.background='#e74c3c'; this.style.boxShadow='0 2px 8px rgba(231, 76, 60, 0.3)';" title="Dersi Sil">
+                                    Dersi Sil
+                                </button>
+                            </form>
+                            <span class="{% if istatistik.devam_yuzdesi < istatistik.devam_zorunlulugu %}danger-badge{% elif istatistik.devam_yuzdesi < 85 %}warning-badge{% else %}success-badge{% endif %}">
+                                {% if istatistik.devam_yuzdesi < istatistik.devam_zorunlulugu %}⚠ TEHLİKE{% elif istatistik.devam_yuzdesi < 85 %}⚠ Dikkat{% else %}✓ Güvenli{% endif %}
+                            </span>
+                        </div>
                     </div>
                     <div class="attendance-bar-container">
                         <div class="attendance-bar-label">
-                            <span>Devam Oranı</span>
-                            <span style="color: {% if istatistik.yuzde < 70 %}#e74c3c{% elif istatistik.yuzde < 85 %}#f39c12{% else %}#667eea{% endif %}; font-weight: 600;">{{ istatistik.yuzde }}%</span>
+                            <span>Devam Oranı (Min: %{{ istatistik.devam_zorunlulugu }})</span>
+                            <span style="color: {% if istatistik.devam_yuzdesi < istatistik.devam_zorunlulugu %}#e74c3c{% elif istatistik.devam_yuzdesi < 85 %}#f39c12{% else %}#e74c3c{% endif %}; font-weight: 600;">{{ istatistik.devam_yuzdesi }}%</span>
                         </div>
                         <div class="attendance-bar">
-                            <div class="attendance-fill {% if istatistik.yuzde < 70 %}danger{% elif istatistik.yuzde < 85 %}warning{% endif %}" style="width: {{ istatistik.yuzde }}%;">{{ istatistik.yuzde }}%</div>
+                            <div class="attendance-fill {% if istatistik.devam_yuzdesi < istatistik.devam_zorunlulugu %}danger{% elif istatistik.devam_yuzdesi < 85 %}warning{% endif %}" style="width: {{ istatistik.devam_yuzdesi }}%;">{{ istatistik.devam_yuzdesi }}%</div>
                         </div>
                     </div>
                     <div class="attendance-details">
                         <div class="detail-item">
-                            <div class="detail-value">14</div>
-                            <div class="detail-label">Toplam Ders</div>
+                            <div class="detail-value">{{ istatistik.toplam_saat }}</div>
+                            <div class="detail-label">Toplam Saat</div>
                         </div>
                         <div class="detail-item">
-                            <div class="detail-value">{{ istatistik.ders|add:istatistik.mazaretsiz }}</div>
+                            <div class="detail-value">{{ istatistik.katilim_saati }}</div>
                             <div class="detail-label">Katıldı</div>
                         </div>
                         <div class="detail-item">
-                            <div class="detail-value">{{ istatistik.toplam_devamsizlik }}</div>
+                            <div class="detail-value" style="color: #e74c3c;">{{ istatistik.devamsiz_saat }}</div>
                             <div class="detail-label">Devamsız</div>
+                        </div>
+                        <div class="detail-item" style="background: {% if istatistik.kalan_hak > 5 %}#d4edda{% elif istatistik.kalan_hak > 0 %}#fff3cd{% else %}#f8d7da{% endif %};">
+                            <div class="detail-value" style="color: {% if istatistik.kalan_hak > 5 %}#155724{% elif istatistik.kalan_hak > 0 %}#856404{% else %}#721c24{% endif %};">{{ istatistik.kalan_hak }}</div>
+                            <div class="detail-label" style="color: {% if istatistik.kalan_hak > 5 %}#155724{% elif istatistik.kalan_hak > 0 %}#856404{% else %}#721c24{% endif %};">Kalan Hak (saat)</div>
                         </div>
                     </div>
                 </div>
