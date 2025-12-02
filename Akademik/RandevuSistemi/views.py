@@ -49,6 +49,17 @@ def randevuSistemi(request):
             except Randevu.DoesNotExist:
                 messages.error(request, 'Randevu bulunamadı!')
         
+        # Reddedilen randevuyu geçmişe taşıma
+        elif action == 'archive':
+            randevu_id = request.POST.get('randevu_id')
+            try:
+                randevu = Randevu.objects.get(id=randevu_id, ogrenci=request.user, durum='reddedildi')
+                randevu.durum = 'iptal'
+                randevu.save()
+                messages.success(request, 'Randevu geçmiş randevulara taşındı.')
+            except Randevu.DoesNotExist:
+                messages.error(request, 'Randevu bulunamadı veya reddedilmiş değil!')
+        
         return redirect('randevu-sistemi')
     
     from datetime import date

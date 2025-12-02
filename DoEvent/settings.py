@@ -86,9 +86,9 @@ WSGI_APPLICATION = 'DoEvent.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'doevent_db',          # DBeaver'da oluşturduğunuz veritabanı adı
-        'USER': 'postgres',            # PostgreSQL kullanıcı adınız
-        'PASSWORD': '12345',   # PostgreSQL şifreniz
+        'NAME': 'doevent_db',          
+        'USER': 'postgres',            
+        'PASSWORD': '12345',   
         'HOST': 'localhost',
         'PORT': '5432',
     }

@@ -59,11 +59,20 @@ def devamsizlikTakvimi(request):
             
             try:
                 devamsizlik = Devamsizlik.objects.get(ogrenci=request.user, ders_id=ders_id)
-                ders_adi = devamsizlik.ders.ders_adi
+                ders = devamsizlik.ders
+                ders_adi = ders.ders_adi
+                
+                # Önce devamsızlık kaydını sil
                 devamsizlik.delete()
+                
+                # Sonra dersin kendisini sil
+                ders.delete()
+                
                 messages.success(request, f'{ders_adi} dersi başarıyla silindi!')
             except Devamsizlik.DoesNotExist:
                 messages.error(request, 'Ders kaydı bulunamadı!')
+            except Exception as e:
+                messages.error(request, f'Silme hatası: {str(e)}')
         
         return redirect('devamsizlikTakvimi')
     

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DoğustanSosyal - Giriş</title>
+    <title>Doğuştan Sosyal - Giriş</title>
     <style>
         * {
             margin: 0;
@@ -73,7 +73,7 @@
             border-radius: 20px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             width: 100%;
-            max-width: 400px;
+            max-width: 450px;
             backdrop-filter: blur(10px);
             animation: slideIn 0.6s ease-out;
         }
@@ -103,6 +103,7 @@
             background-clip: text;
             margin-bottom: 10px;
             animation: glow 2s ease-in-out infinite;
+            white-space: nowrap;
         }
 
         @keyframes glow {
@@ -212,6 +213,16 @@
             animation: shake 0.5s;
         }
 
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #28a745;
+            animation: slideIn 0.5s;
+        }
+
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
             25% { transform: translateX(-10px); }
@@ -283,13 +294,13 @@
 
     <div class="login-container">
         <div class="logo-container">
-            <div class="logo">DoğustanSosyal</div>
+            <div class="logo">Doğuştan Sosyal</div>
             <div class="subtitle">Etkinlik Yönetim Sistemi</div>
         </div>
 
         {% if messages %}
             {% for message in messages %}
-                <div class="error-message">{{ message }}</div>
+                <div class="{% if message.tags == 'error' %}error-message{% else %}success-message{% endif %}">{{ message }}</div>
             {% endfor %}
         {% endif %}
 

@@ -264,13 +264,13 @@
     <!-- Ders Ekleme Formu -->
     <div style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); padding: 30px; border-radius: 20px; margin-bottom: 30px; box-shadow: 0 4px 20px rgba(231, 76, 60, 0.3);">
         <h2 style="color: white; margin-bottom: 20px; font-size: 24px;">Yeni Ders Ekle</h2>
-        <form method="POST" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+        <form method="POST" action="{% url 'devamsizlikTakvimi' %}" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
             {% csrf_token %}
             <input type="hidden" name="action" value="add_ders">
             <div>
                 <label style="color: white; font-size: 14px; display: block; margin-bottom: 8px;">Ders Adı (Kod)</label>
                 <input type="text" name="ders_adi" placeholder="BOM361" required 
-                       style="width: 100%; padding: 12px; border: none; border-radius: 10px; font-size: 14px;">
+                       style="width: 100%; padding: 12px; border: none; border-radius: 10px; font-size: 14px; text-transform: uppercase;">
             </div>
             <div>
                 <label style="color: white; font-size: 14px; display: block; margin-bottom: 8px;">Devam Zorunluluğu (%)</label>
@@ -303,7 +303,7 @@
                         </div>
                         <div style="display: flex; gap: 10px; align-items: center;">
                             <!-- Devamsızlık Ekleme Formu -->
-                            <form method="POST" action="#ders-{{ istatistik.ders.id }}" style="display: flex; gap: 10px; align-items: center;">
+                            <form method="POST" action="{% url 'devamsizlikTakvimi' %}#ders-{{ istatistik.ders.id }}" style="display: flex; gap: 10px; align-items: center;">
                                 {% csrf_token %}
                                 <input type="hidden" name="action" value="add_devamsizlik">
                                 <input type="hidden" name="ders_id" value="{{ istatistik.ders.id }}">
@@ -321,7 +321,7 @@
                                 </button>
                             </form>
                             <!-- Ders Silme Butonu -->
-                            <form method="POST" onsubmit="return confirm('{{ istatistik.ders.ders_adi }} dersini silmek istediğinize emin misiniz?');">
+                            <form method="POST" action="{% url 'devamsizlikTakvimi' %}" onsubmit="return confirm('{{ istatistik.ders.ders_adi }} dersini silmek istediğinize emin misiniz?');">
                                 {% csrf_token %}
                                 <input type="hidden" name="action" value="delete_ders">
                                 <input type="hidden" name="ders_id" value="{{ istatistik.ders.id }}">
@@ -376,7 +376,6 @@
 {% endblock %}
 
 {% block extra_scripts %}
-<script>
     // Animate progress bars on load
     window.addEventListener('load', () => {
         document.querySelectorAll('.attendance-fill').forEach(bar => {
@@ -387,5 +386,4 @@
             }, 100);
         });
     });
-</script>
 {% endblock %}

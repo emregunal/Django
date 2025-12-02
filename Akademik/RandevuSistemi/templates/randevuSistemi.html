@@ -87,6 +87,7 @@
         border-radius: 15px;
         margin-bottom: 15px;
         border-left: 4px solid #e74c3c;
+        position: relative;
     }
 
     .appointment-instructor {
@@ -215,6 +216,34 @@
         transform: translateY(-2px);
     }
 
+    .btn-remove {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        width: 30px;
+        height: 30px;
+        background: #e74c3c;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        font-size: 18px;
+        font-weight: 700;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s;
+        box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
+        line-height: 1;
+        padding: 0;
+    }
+
+    .btn-remove:hover {
+        background: #c0392b;
+        transform: scale(1.1);
+        box-shadow: 0 4px 12px rgba(231, 76, 60, 0.5);
+    }
+
     .empty-state {
         text-align: center;
         padding: 40px 20px;
@@ -267,6 +296,14 @@
             {% if aktif_randevular %}
                 {% for randevu in aktif_randevular %}
                 <div class="appointment-card">
+                    {% if randevu.durum == 'reddedildi' %}
+                    <form method="POST" action="{% url 'randevu-sistemi' %}" style="display: inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="archive">
+        <input type="hidden" name="randevu_id" value="{{ randevu.id }}">
+                        <button type="submit" class="btn-remove" title="Geçmişe Taşı">×</button>
+                    </form>
+                    {% endif %}
                     <div class="appointment-instructor">{{ randevu.ogretmen.unvan }} {{ randevu.ogretmen.kullanici.get_full_name }}</div>
                     <div class="appointment-info">
                         <div class="appointment-info-item">
