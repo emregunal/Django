@@ -72,7 +72,7 @@ DATABASES = {
 # MongoDB connection for app data
 from pymongo import MongoClient
 
-MONGODB_URI = config('MONGODB_URI')
+MONGODB_URI = config('MONGODB_URI', default='mongodb://localhost:27017/')
 MONGODB_DB_NAME = config('MONGODB_DB_NAME', default='dogustansosyalDB')
 
 try:
