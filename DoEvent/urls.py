@@ -19,6 +19,7 @@ from django.urls import path,include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('admin-panel/', include('Core.admin_urls')),  # Custom admin panel
     path('', include('Core.urls')),  # Ana sayfa
     path('Kullanıcılar/', include('Kullanıcılar.urls')),
     path('Akademik/', include('Akademik.urls')),
