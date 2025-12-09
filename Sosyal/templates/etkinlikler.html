@@ -11,8 +11,15 @@
     }
 
     @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(30px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
     .filter-section {
@@ -38,7 +45,8 @@
         font-weight: 500;
     }
 
-    .filter-btn:hover, .filter-btn.active {
+    .filter-btn:hover,
+    .filter-btn.active {
         border-color: #e74c3c;
         background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
         color: white;
@@ -89,12 +97,29 @@
         animation-fill-mode: both;
     }
 
-    .event-card:nth-child(1) { animation-delay: 0.1s; }
-    .event-card:nth-child(2) { animation-delay: 0.2s; }
-    .event-card:nth-child(3) { animation-delay: 0.3s; }
-    .event-card:nth-child(4) { animation-delay: 0.4s; }
-    .event-card:nth-child(5) { animation-delay: 0.5s; }
-    .event-card:nth-child(6) { animation-delay: 0.6s; }
+    .event-card:nth-child(1) {
+        animation-delay: 0.1s;
+    }
+
+    .event-card:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .event-card:nth-child(3) {
+        animation-delay: 0.3s;
+    }
+
+    .event-card:nth-child(4) {
+        animation-delay: 0.4s;
+    }
+
+    .event-card:nth-child(5) {
+        animation-delay: 0.5s;
+    }
+
+    .event-card:nth-child(6) {
+        animation-delay: 0.6s;
+    }
 
     .event-card:hover {
         transform: translateY(-10px);
@@ -199,7 +224,7 @@
         <button class="filter-btn">Spor</button>
         <button class="filter-btn">Sosyal</button>
         <button class="filter-btn">Akademik</button>
-        
+
         <div class="search-box">
             <span class="search-icon">🔍</span>
             <input type="text" class="search-input" placeholder="Etkinlik ara...">
@@ -208,43 +233,47 @@
 
     <div class="events-grid">
         {% if etkinlikler %}
-            {% for etkinlik in etkinlikler %}
-            <div class="event-card" data-kategori="{{ etkinlik.kategori }}">
-                <div class="event-image">
-                    {% if etkinlik.kategori == 'konser' %}🎵
-                    {% elif etkinlik.kategori == 'konferans' %}🎤
-                    {% elif etkinlik.kategori == 'spor' %}⚽
-                    {% elif etkinlik.kategori == 'sosyal' %}🎨
-                    {% elif etkinlik.kategori == 'akademik' %}📚
-                    {% elif etkinlik.kategori == 'tiyatro' %}🎭
-                    {% else %}🎪{% endif %}
+        {% for etkinlik in etkinlikler %}
+        <div class="event-card" data-kategori="{{ etkinlik.kategori }}">
+            <div class="event-image">
+                {% if etkinlik.kategori == 'konser' %}🎵
+                {% elif etkinlik.kategori == 'konferans' %}🎤
+                {% elif etkinlik.kategori == 'spor' %}⚽
+                {% elif etkinlik.kategori == 'sosyal' %}🎨
+                {% elif etkinlik.kategori == 'akademik' %}📚
+                {% elif etkinlik.kategori == 'tiyatro' %}🎭
+                {% else %}🎪{% endif %}
+            </div>
+            <div class="event-content">
+                <span class="event-category">{{ etkinlik.kategori|title }}</span>
+                <h3 class="event-title">{{ etkinlik.baslik }}</h3>
+                <div class="event-info">
+                    <div class="event-info-item">📅 {{ etkinlik.tarih|date:"d F Y, l" }}</div>
+                    <div class="event-info-item">🕐 {{ etkinlik.baslangic_saati }} - {{ etkinlik.bitis_saati }}</div>
+                    <div class="event-info-item">📍 {{ etkinlik.konum }}</div>
                 </div>
-                <div class="event-content">
-                    <span class="event-category">{{ etkinlik.get_kategori_display }}</span>
-                    <h3 class="event-title">{{ etkinlik.baslik }}</h3>
-                    <div class="event-info">
-                        <div class="event-info-item">📅 {{ etkinlik.tarih|date:"d F Y, l" }}</div>
-                        <div class="event-info-item">🕐 {{ etkinlik.baslangic_saati|time:"H:i" }} - {{ etkinlik.bitis_saati|time:"H:i" }}</div>
-                        <div class="event-info-item">📍 {{ etkinlik.konum }}</div>
-                    </div>
-                    <p class="event-description">{{ etkinlik.aciklama|truncatewords:20 }}</p>
-                    <div class="event-footer">
-                        <div class="participants" data-etkinlik-id="{{ etkinlik.id }}">👥 {{ etkinlik.katilimci_sayisi }} katılımcı</div>
-                        <button class="btn-join" data-etkinlik-id="{{ etkinlik.id }}" 
-                                {% if user in etkinlik.katilimcilar.all %}data-katildi="true"{% endif %}>
-                            {% if user in etkinlik.katilimcilar.all %}Katıldınız ✓{% else %}Katıl{% endif %}
-                        </button>
-                    </div>
+                <p class="event-description">{{ etkinlik.aciklama|truncatewords:20 }}</p>
+                <div class="event-footer">
+                    <div class="participants" data-etkinlik-id="{{ etkinlik.id }}">👥 {{ etkinlik.katilimci_sayisi }}
+                        katılımcı</div>
+                    <button class="btn-join" data-etkinlik-id="{{ etkinlik.id }}">
+                        Katıl
+                    </button>
                 </div>
             </div>
-            {% endfor %}
+        </div>
+        {% endfor %}
         {% else %}
-            <div style="grid-column: 1/-1; text-align: center; padding: 80px 40px; background: white; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.08);">
-                <div style="font-size: 64px; margin-bottom: 20px;">🎪</div>
-                <h3 style="font-size: 24px; color: #333; margin-bottom: 10px;">Henüz Etkinlik Bulunmuyor</h3>
-                <p style="color: #999; font-size: 16px; margin-bottom: 20px;">Yeni etkinlikler yakında eklenecek. Etkinlik önermek için aşağıdaki butona tıklayın!</p>
-                <a href="/Sosyal/etkinlik-oner/" style="display: inline-block; padding: 12px 30px; background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: white; text-decoration: none; border-radius: 25px; font-weight: 600; transition: all 0.3s;">Etkinlik Öner</a>
-            </div>
+        <div
+            style="grid-column: 1/-1; text-align: center; padding: 80px 40px; background: white; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.08);">
+            <div style="font-size: 64px; margin-bottom: 20px;">🎪</div>
+            <h3 style="font-size: 24px; color: #333; margin-bottom: 10px;">Henüz Etkinlik Bulunmuyor</h3>
+            <p style="color: #999; font-size: 16px; margin-bottom: 20px;">Yeni etkinlikler yakında eklenecek. Etkinlik
+                önermek için aşağıdaki butona tıklayın!</p>
+            <a href="/Sosyal/etkinlik-oner/"
+                style="display: inline-block; padding: 12px 30px; background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: white; text-decoration: none; border-radius: 25px; font-weight: 600; transition: all 0.3s;">Etkinlik
+                Öner</a>
+        </div>
         {% endif %}
     </div>
 </div>
@@ -254,7 +283,7 @@
 <script>
     // Filter buttons
     document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function () {
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
             this.classList.add('active');
         });
@@ -262,13 +291,13 @@
 
     // Join buttons - AJAX ile database'e kaydet
     document.querySelectorAll('.btn-join').forEach(btn => {
-        btn.addEventListener('click', function(e) {
+        btn.addEventListener('click', function (e) {
             e.preventDefault();
             e.stopPropagation();
-            
+
             const etkinlikId = this.getAttribute('data-etkinlik-id');
             const katildi = this.getAttribute('data-katildi') === 'true';
-            
+
             // AJAX isteği gönder
             fetch(`/Sosyal/etkinlik/${etkinlikId}/katil/`, {
                 method: 'POST',
@@ -277,36 +306,36 @@
                     'X-CSRFToken': getCookie('csrftoken')
                 }
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    if (data.katildi) {
-                        this.textContent = 'Katıldınız ✓';
-                        this.style.background = 'linear-gradient(135deg, #27ae60 0%, #2ecc71 100%)';
-                        this.setAttribute('data-katildi', 'true');
-                        
-                        const card = this.closest('.event-card');
-                        const title = card.querySelector('.event-title').textContent;
-                        showToast(`"${title}" etkinliğine başarıyla katıldınız! 🎉`);
-                    } else {
-                        this.textContent = 'Katıl';
-                        this.style.background = 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)';
-                        this.setAttribute('data-katildi', 'false');
-                        showToast('Etkinlikten ayrıldınız.');
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        if (data.katildi) {
+                            this.textContent = 'Katıldınız ✓';
+                            this.style.background = 'linear-gradient(135deg, #27ae60 0%, #2ecc71 100%)';
+                            this.setAttribute('data-katildi', 'true');
+
+                            const card = this.closest('.event-card');
+                            const title = card.querySelector('.event-title').textContent;
+                            showToast(`"${title}" etkinliğine başarıyla katıldınız! 🎉`);
+                        } else {
+                            this.textContent = 'Katıl';
+                            this.style.background = 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)';
+                            this.setAttribute('data-katildi', 'false');
+                            showToast('Etkinlikten ayrıldınız.');
+                        }
+
+                        // Katılımcı sayısını güncelle
+                        const participantDiv = this.parentElement.querySelector('.participants');
+                        participantDiv.innerHTML = `👥 ${data.katilimci_sayisi} katılımcı`;
                     }
-                    
-                    // Katılımcı sayısını güncelle
-                    const participantDiv = this.parentElement.querySelector('.participants');
-                    participantDiv.innerHTML = `👥 ${data.katilimci_sayisi} katılımcı`;
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showToast('Bir hata oluştu. Lütfen tekrar deneyin.');
-            });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('Bir hata oluştu. Lütfen tekrar deneyin.');
+                });
         });
     });
-    
+
     // CSRF token helper
     function getCookie(name) {
         let cookieValue = null;
@@ -325,7 +354,7 @@
 
     // Event card click - Sadece kart alanına tıklandığında çalışır
     document.querySelectorAll('.event-card').forEach(card => {
-        card.addEventListener('click', function(e) {
+        card.addEventListener('click', function (e) {
             // Eğer butona tıklanmadıysa
             if (!e.target.closest('.btn-join')) {
                 const title = this.querySelector('.event-title').textContent;

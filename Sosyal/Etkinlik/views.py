@@ -1,8 +1,8 @@
 from django.shortcuts import render
 from django.http.response import HttpResponse
-from django.contrib.auth.decorators import login_required
+from Kullanıcılar.decorators import kullanici_login_required
 
 
-@login_required(login_url='/Kullanıcılar/login/')
+@kullanici_login_required
 def etkinlik(request, id):
   return render(request, "etkinlik.html")

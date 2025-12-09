@@ -1,6 +1,7 @@
 <!-- Base Template - Tüm sayfalar için ortak yapı -->
 <!DOCTYPE html>
 <html lang="tr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -134,7 +135,7 @@
             position: relative;
         }
 
-        .dropdown:hover > .dropdown-content {
+        .dropdown:hover>.dropdown-content {
             visibility: visible;
             opacity: 1;
             transform: translateY(0);
@@ -186,6 +187,7 @@
                 opacity: 0;
                 transform: translateY(-10px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -434,6 +436,7 @@
         {% block extra_styles %}{% endblock %}
     </style>
 </head>
+
 <body>
     <!-- Modern Navbar -->
     <nav class="navbar">
@@ -495,8 +498,8 @@
 
             <div class="user-section">
                 <div class="user-profile" id="userProfile">
-                    <div class="user-avatar">{{ user.username.0|upper|default:"U" }}</div>
-                    <span class="user-name">{{ user.username }}</span>
+                    <div class="user-avatar">{{ request.session.user_username.0|upper|default:"U" }}</div>
+                    <span class="user-name">{{ request.session.user_username|default:"Kullanıcı" }}</span>
                     <div class="user-dropdown" id="userDropdown">
                         <a href="{% url 'kullanicilar:logout' %}" class="dropdown-item">
                             Çıkış Yap
@@ -553,13 +556,13 @@
         dropdowns.forEach(dropdown => {
             const trigger = dropdown.querySelector('.nav-link');
             const content = dropdown.querySelector('.dropdown-content');
-            
+
             if (trigger && content) {
                 trigger.addEventListener('click', (e) => {
                     if (window.innerWidth <= 768) {
                         e.preventDefault();
                         e.stopPropagation();
-                        
+
                         // Close other dropdowns
                         dropdowns.forEach(d => {
                             if (d !== dropdown) {
@@ -567,7 +570,7 @@
                                 if (dContent) dContent.classList.remove('mobile-active');
                             }
                         });
-                        
+
                         content.classList.toggle('mobile-active');
                     }
                 });
@@ -584,7 +587,8 @@
             }
         });
 
-        {% block extra_scripts %}{% endblock %}
+        {% block extra_scripts %} {% endblock %}
     </script>
 </body>
+
 </html>

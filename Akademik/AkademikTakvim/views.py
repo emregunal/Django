@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
+from Kullanıcılar.decorators import kullanici_login_required
 from django.contrib import messages
 from Core.mongodb_utils import get_db, serialize_mongo_docs
 from datetime import datetime
@@ -40,7 +40,7 @@ def parse_turkish_date(date_str):
     
     return datetime(9999, 12, 31)  # If parsing fails, put at the end
 
-@login_required(login_url='/Kullanıcılar/login/')
+@kullanici_login_required
 def akademik_takvim(request):
     db = get_db()
     
@@ -105,7 +105,7 @@ def akademik_takvim(request):
     }
     return render(request, 'canliAkademikTakvim.html', context)
 
-@login_required(login_url='/Kullanıcılar/login/')
+@kullanici_login_required
 def canliAkademikTakvim(request):
     return akademik_takvim(request)
 

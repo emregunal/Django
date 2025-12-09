@@ -1,11 +1,11 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
+from Kullanıcılar.decorators import kullanici_login_required
 from django.contrib import messages
 from Core.mongodb_utils import get_db, serialize_mongo_docs
 from datetime import datetime
 from bson import ObjectId
 
-@login_required(login_url='/Kullanıcılar/login/')
+@kullanici_login_required
 def devamsizlik_listesi(request):
     db = get_db()
     
@@ -19,8 +19,8 @@ def devamsizlik_listesi(request):
             haftalik_ders_saati = int(request.POST.get('haftalik_ders_saati', 3))
             
             db.dersler.insert_one({
-                'ogrenci_id': request.user.id,
-                'ogrenci_username': request.user.username,
+                'ogrenci_id': request.session.get('user_id'),
+                'ogrenci_username': request.session.get('user_username'),
                 'ders_adi': ders_adi.upper(),
                 'ders_kodu': ders_adi.upper(),
                 'devam_zorunlulugu': devam_zorunlulugu,
@@ -58,7 +58,7 @@ def devamsizlik_listesi(request):
             return redirect('devamsizlikTakvimi')
     
     # Öğrencinin derslerini getir
-    dersler = list(db.dersler.find({'ogrenci_id': request.user.id}))
+    dersler = list(db.dersler.find({'ogrenci_id': request.session.get('user_id')}))
     
     # İstatistikleri hesapla
     ders_istatistikleri = []
@@ -93,11 +93,11 @@ def devamsizlik_listesi(request):
     }
     return render(request, 'devamsizlikTakvimi.html', context)
 
-@login_required(login_url='/Kullanıcılar/login/')
+@kullanici_login_required
 def devamsizlikTakvimi(request):
     return devamsizlik_listesi(request)
 
-@login_required(login_url='/Kullanıcılar/login/')
+@kullanici_login_required
 def devamsizlik_ekle(request):
     if request.method == 'POST':
         ders_kodu = request.POST.get('ders_kodu')
@@ -110,7 +110,7 @@ def devamsizlik_ekle(request):
             
             # Aynı ders için kayıt var mı kontrol et
             existing = db.devamsizliklar.find_one({
-                'ogrenci_id': request.user.id,
+                'ogrenci_id': request.session.get('user_id'),
                 'ders_kodu': ders_kodu
             })
             
@@ -130,8 +130,8 @@ def devamsizlik_ekle(request):
             else:
                 # Yeni kayıt
                 db.devamsizliklar.insert_one({
-                    'ogrenci_id': request.user.id,
-                    'ogrenci_username': request.user.username,
+                    'ogrenci_id': request.session.get('user_id'),
+                    'ogrenci_username': request.session.get('user_username'),
                     'ders_kodu': ders_kodu,
                     'ders_adi': ders_adi,
                     'devamsiz_saat': devamsiz_saat,

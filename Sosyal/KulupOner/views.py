@@ -1,10 +1,10 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
+from Kullanıcılar.decorators import kullanici_login_required
 from django.contrib import messages
 from Core.mongodb_utils import get_db
 from datetime import datetime
 
-@login_required(login_url='/Kullanıcılar/login/')
+@kullanici_login_required
 def kulupOner(request):
     if request.method == 'POST':
         ad = request.POST.get('ad')
@@ -17,8 +17,8 @@ def kulupOner(request):
                 'ad': ad,
                 'kategori': kategori,
                 'aciklama': aciklama,
-                'kurucu_id': request.user.id,
-                'kurucu_username': request.user.username,
+                'kurucu_id': request.session.get('user_id'),
+                'kurucu_username': request.session.get('user_username'),
                 'uye_ids': [],
                 'olusturma_tarihi': datetime.now()
             })

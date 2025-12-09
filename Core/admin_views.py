@@ -207,7 +207,12 @@ def add_event(request):
         ucret_tipi = request.POST.get('ucret')
         ucret_tutari = None
         if ucret_tipi == 'paid':
-            ucret_tutari = float(request.POST.get('ucret_tutari', 0))
+            ucret_str = request.POST.get('ucret_tutari', '').strip()
+            ucret_tutari = float(ucret_str) if ucret_str else 0
+        
+        # Kontenjan
+        kontenjan_str = request.POST.get('kontenjan', '').strip()
+        kontenjan = int(kontenjan_str) if kontenjan_str else None
         
         event_data = {
             'baslik': request.POST.get('baslik'),
@@ -217,7 +222,7 @@ def add_event(request):
             'baslangic_saati': request.POST.get('baslangic_saati'),
             'bitis_saati': request.POST.get('bitis_saati'),
             'konum': request.POST.get('konum'),
-            'kontenjan': int(request.POST.get('kontenjan', 0)),
+            'kontenjan': kontenjan,
             'ucret_tipi': ucret_tipi,
             'ucret_tutari': ucret_tutari,
             'durum': 'onaylandi' if role == 'superadmin' else 'bekliyor',
@@ -256,6 +261,8 @@ def edit_event(request, event_id):
         return redirect('admin_events')
     
     if request.method == 'POST':
+        katilimci_limiti_str = request.POST.get('katilimci_limiti', '').strip()
+        
         update_data = {
             'baslik': request.POST.get('baslik'),
             'aciklama': request.POST.get('aciklama'),
@@ -263,7 +270,7 @@ def edit_event(request, event_id):
             'tarih': request.POST.get('tarih'),
             'saat': request.POST.get('saat'),
             'konum': request.POST.get('konum'),
-            'katilimci_limiti': int(request.POST.get('katilimci_limiti', 0)) or None,
+            'katilimci_limiti': int(katilimci_limiti_str) if katilimci_limiti_str else None,
         }
         
         db.etkinlikler.update_one(

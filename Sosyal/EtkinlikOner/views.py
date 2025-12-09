@@ -1,10 +1,10 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
+from Kullanıcılar.decorators import kullanici_login_required
 from django.contrib import messages
 from Core.mongodb_utils import get_db
 from datetime import datetime
 
-@login_required(login_url='/Kullanıcılar/login/')
+@kullanici_login_required
 def etkinlikOner(request):
     if request.method == 'POST':
         baslik = request.POST.get('baslik')
@@ -25,8 +25,8 @@ def etkinlikOner(request):
                 'bitis_saati': bitis_saati,
                 'konum': konum,
                 'aciklama': aciklama,
-                'olusturan_id': request.user.id,
-                'olusturan_username': request.user.username,
+                'olusturan_id': request.session.get('user_id'),
+                'olusturan_username': request.session.get('user_username'),
                 'katilimci_ids': [],
                 'olusturma_tarihi': datetime.now()
             })

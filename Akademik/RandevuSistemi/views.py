@@ -1,11 +1,11 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
+from Kullanıcılar.decorators import kullanici_login_required
 from django.contrib import messages
 from Core.mongodb_utils import get_db, serialize_mongo_docs
 from datetime import datetime
 from bson import ObjectId
 
-@login_required(login_url='/Kullanıcılar/login/')
+@kullanici_login_required
 def randevu_listesi(request):
     db = get_db()
     
@@ -26,8 +26,8 @@ def randevu_listesi(request):
             
             if ogretmen:
                 db.randevular.insert_one({
-                    'ogrenci_id': request.user.id,
-                    'ogrenci_username': request.user.username,
+                    'ogrenci_id': request.session.get('user_id'),
+                    'ogrenci_username': request.session.get('user_username'),
                     'ogretmen_id': str(ogretmen['_id']),
                     'ogretmen_adi': ogretmen.get('ad'),
                     'ogretmen_unvan': ogretmen.get('unvan'),
@@ -67,7 +67,7 @@ def randevu_listesi(request):
             return redirect('randevu-sistemi')
     
     # Öğrencinin randevularını getir
-    randevular = list(db.randevular.find({'ogrenci_id': request.user.id}))
+    randevular = list(db.randevular.find({'ogrenci_id': request.session.get('user_id')}))
     randevular = serialize_mongo_docs(randevular)
     
     # Aktif ve geçmiş randevuları ayır
@@ -120,15 +120,15 @@ def randevu_listesi(request):
     }
     return render(request, 'randevuSistemi.html', context)
 
-@login_required(login_url='/Kullanıcılar/login/')
+@kullanici_login_required
 def randevuSistemi(request):
     return randevu_listesi(request)
 
-@login_required(login_url='/Kullanıcılar/login/')
+@kullanici_login_required
 def randevuYonetim(request):
     return randevu_listesi(request)
 
-@login_required(login_url='/Kullanıcılar/login/')
+@kullanici_login_required
 def randevu_olustur(request):
     if request.method == 'POST':
         ogretmen_adi = request.POST.get('ogretmen_adi')
@@ -141,8 +141,8 @@ def randevu_olustur(request):
         try:
             db = get_db()
             db.randevular.insert_one({
-                'ogrenci_id': request.user.id,
-                'ogrenci_username': request.user.username,
+                'ogrenci_id': request.session.get('user_id'),
+                'ogrenci_username': request.session.get('user_username'),
                 'ogretmen_adi': ogretmen_adi,
                 'tarih': tarih,
                 'baslangic_saati': baslangic_saati,

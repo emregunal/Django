@@ -19,7 +19,8 @@ def get_db():
         MONGODB_URI = config('MONGODB_URI')
         MONGODB_DB_NAME = config('MONGODB_DB_NAME', default='dogustansosyalDB')
         
-        mongodb_client = MongoClient(MONGODB_URI)
+        # SSL sertifika doğrulamasını devre dışı bırak (development için)
+        mongodb_client = MongoClient(MONGODB_URI, tlsAllowInvalidCertificates=True)
         return mongodb_client[MONGODB_DB_NAME]
 
 def serialize_mongo_doc(doc):

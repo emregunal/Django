@@ -76,7 +76,8 @@ MONGODB_URI = config('MONGODB_URI', default='mongodb://localhost:27017/')
 MONGODB_DB_NAME = config('MONGODB_DB_NAME', default='dogustansosyalDB')
 
 try:
-    mongodb_client = MongoClient(MONGODB_URI)
+    # SSL sertifika doğrulamasını devre dışı bırak (development için)
+    mongodb_client = MongoClient(MONGODB_URI, tlsAllowInvalidCertificates=True)
     mongodb_db = mongodb_client[MONGODB_DB_NAME]
     print(f"MongoDB baglantisi basarili: {MONGODB_DB_NAME}")
 except Exception as e:
