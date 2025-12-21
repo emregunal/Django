@@ -1,11 +1,299 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>akademik takvim canli</title>
-</head>
-<body>
-    <h1>canli</h1>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}Akademik Takvim - DoğustanSosyal{% endblock %}
+{% block page_title %}Akademik Takvim{% endblock %}
+{% block page_subtitle %}2025-2026 Akademik Yılı - Sınavlar, tatiller ve önemli tarihleri takip et!{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .calendar-container {
+        background: white;
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        margin-bottom: 30px;
+    }
+
+    .section-title {
+        font-size: 22px;
+        font-weight: 600;
+        color: #1a202c;
+        margin-bottom: 20px;
+        padding-left: 15px;
+        border-left: 4px solid #e74c3c;
+    }
+
+    /* Yaklaşan Etkinlikler */
+    .events-list {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .event-card {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding: 20px;
+        border-radius: 12px;
+        border-left: 4px solid #e74c3c;
+        background: #f7fafc;
+    }
+
+    .event-card.event-exam {
+        border-left-color: #f56565;
+        background: #fff5f5;
+    }
+
+    .event-card.event-holiday {
+        border-left-color: #48bb78;
+        background: #f0fff4;
+    }
+
+    .event-icon {
+        width: 8px;
+        height: 8px;
+        min-width: 8px;
+        border-radius: 50%;
+        background: #e74c3c;
+        margin-top: 8px;
+    }
+
+    .event-card.event-exam .event-icon {
+        background: #f56565;
+    }
+
+    .event-card.event-holiday .event-icon {
+        background: #48bb78;
+    }
+
+    .event-content {
+        flex: 1;
+    }
+
+    .event-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 5px;
+    }
+
+    .event-date {
+        font-size: 14px;
+        color: #e74c3c;
+        margin-bottom: 8px;
+        font-weight: 500;
+    }
+
+    .event-description {
+        font-size: 14px;
+        color: #718096;
+        line-height: 1.5;
+    }
+
+    .event-location {
+        font-size: 13px;
+        color: #a0aec0;
+        margin-top: 5px;
+    }
+
+    .event-badge {
+        background: #e74c3c;
+        color: white;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .event-card.event-exam .event-badge {
+        background: #f56565;
+    }
+
+    .event-card.event-holiday .event-badge {
+        background: #48bb78;
+    }
+
+    /* Kategoriler */
+    .category-section {
+        margin-bottom: 35px;
+    }
+
+    .category-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 15px;
+        padding-left: 12px;
+        border-left: 4px solid #e74c3c;
+    }
+
+    .timeline-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .timeline-item {
+        display: flex;
+        gap: 20px;
+        padding: 15px;
+        border-radius: 10px;
+        background: #f7fafc;
+    }
+
+    .timeline-item.holiday {
+        background: #f0fff4;
+    }
+
+    .timeline-date {
+        min-width: 100px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #e74c3c;
+    }
+
+    .timeline-content {
+        flex: 1;
+    }
+
+    .timeline-title {
+        font-size: 15px;
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 4px;
+    }
+
+    .timeline-desc {
+        font-size: 14px;
+        color: #718096;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 50px;
+        color: #a0aec0;
+    }
+
+    .empty-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: #e2e8f0;
+        margin: 0 auto 15px;
+    }
+
+    @media (max-width: 768px) {
+        .event-card {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .event-icon {
+            font-size: 28px;
+        }
+
+        .timeline-item {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .timeline-date {
+            min-width: auto;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Yaklaşan Etkinlikler -->
+<div class="calendar-container">
+    <h2 class="section-title">Yaklaşan 60 Gün</h2>
+    <div class="events-list">
+        {% if yaklasan_etkinlikler %}
+            {% for etkinlik in yaklasan_etkinlikler %}
+            <div class="event-card {% if etkinlik.tip == 'sinav' %}event-exam{% elif etkinlik.tip == 'tatil' %}event-holiday{% endif %}">
+                <div class="event-icon"></div>
+                <div class="event-content">
+                    <div class="event-title">{{ etkinlik.baslik }}</div>
+                    <div class="event-date">{{ etkinlik.tarih|date:"d E Y, l" }}</div>
+                    <div class="event-description">{{ etkinlik.aciklama }}</div>
+                    {% if etkinlik.konum %}
+                    <div class="event-location">{{ etkinlik.konum }}</div>
+                    {% endif %}
+                </div>
+                <div class="event-badge">
+                    {% if etkinlik.tip == 'sinav' %}Sınav
+                    {% elif etkinlik.tip == 'tatil' %}Tatil
+                    {% else %}Etkinlik{% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon"></div>
+                <p>Yaklaşan 60 gün içinde etkinlik yok</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Tüm Etkinlikler -->
+<div class="calendar-container">
+    <h2 class="section-title">2025-2026 Akademik Yıl Takvimi</h2>
+    
+    <!-- Sınavlar -->
+    {% if sinavlar %}
+    <div class="category-section">
+        <h3 class="category-title">Sınavlar</h3>
+        <div class="timeline-list">
+            {% for sinav in sinavlar %}
+            <div class="timeline-item">
+                <div class="timeline-date">{{ sinav.tarih|date:"d E Y" }}</div>
+                <div class="timeline-content">
+                    <div class="timeline-title">{{ sinav.baslik }}</div>
+                    <div class="timeline-desc">{{ sinav.aciklama }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Tatiller -->
+    {% if tatiller %}
+    <div class="category-section">
+        <h3 class="category-title">Tatiller & Resmi Günler</h3>
+        <div class="timeline-list">
+            {% for tatil in tatiller %}
+            <div class="timeline-item holiday">
+                <div class="timeline-date">{{ tatil.tarih|date:"d E Y" }}</div>
+                <div class="timeline-content">
+                    <div class="timeline-title">{{ tatil.baslik }}</div>
+                    <div class="timeline-desc">{{ tatil.aciklama }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Diğer Önemli Tarihler -->
+    {% if diger %}
+    <div class="category-section">
+        <h3 class="category-title">Önemli Tarihler</h3>
+        <div class="timeline-list">
+            {% for etkinlik in diger %}
+            <div class="timeline-item">
+                <div class="timeline-date">{{ etkinlik.tarih|date:"d E Y" }}</div>
+                <div class="timeline-content">
+                    <div class="timeline-title">{{ etkinlik.baslik }}</div>
+                    <div class="timeline-desc">{{ etkinlik.aciklama }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

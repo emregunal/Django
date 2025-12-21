@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}Etkinlikler - DoğustanSosyal{% endblock %}
-{% block page_title %}🎪 Etkinlikler{% endblock %}
+{% block page_title %}Etkinlikler{% endblock %}
 {% block page_subtitle %}Kampüste düzenlenen tüm etkinlikleri keşfet ve katıl!{% endblock %}
 
 {% block extra_styles %}
@@ -133,7 +133,11 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 64px;
+        font-size: 28px;
+        font-weight: 700;
+        color: white;
+        text-transform: uppercase;
+        letter-spacing: 3px;
     }
 
     .event-content {
@@ -226,7 +230,7 @@
         <button class="filter-btn">Akademik</button>
 
         <div class="search-box">
-            <span class="search-icon">🔍</span>
+            <span class="search-icon"></span>
             <input type="text" class="search-input" placeholder="Etkinlik ara...">
         </div>
     </div>
@@ -236,28 +240,24 @@
         {% for etkinlik in etkinlikler %}
         <div class="event-card" data-kategori="{{ etkinlik.kategori }}">
             <div class="event-image">
-                {% if etkinlik.kategori == 'konser' %}🎵
-                {% elif etkinlik.kategori == 'konferans' %}🎤
-                {% elif etkinlik.kategori == 'spor' %}⚽
-                {% elif etkinlik.kategori == 'sosyal' %}🎨
-                {% elif etkinlik.kategori == 'akademik' %}📚
-                {% elif etkinlik.kategori == 'tiyatro' %}🎭
-                {% else %}🎪{% endif %}
+                {{ etkinlik.kategori|title }}
             </div>
             <div class="event-content">
                 <span class="event-category">{{ etkinlik.kategori|title }}</span>
                 <h3 class="event-title">{{ etkinlik.baslik }}</h3>
                 <div class="event-info">
-                    <div class="event-info-item">📅 {{ etkinlik.tarih|date:"d F Y, l" }}</div>
-                    <div class="event-info-item">🕐 {{ etkinlik.baslangic_saati }} - {{ etkinlik.bitis_saati }}</div>
-                    <div class="event-info-item">📍 {{ etkinlik.konum }}</div>
+                    <div class="event-info-item">{{ etkinlik.tarih|date:"d F Y, l" }}</div>
+                    <div class="event-info-item">{{ etkinlik.baslangic_saati }} - {{ etkinlik.bitis_saati }}</div>
+                    <div class="event-info-item">{{ etkinlik.konum }}</div>
                 </div>
                 <p class="event-description">{{ etkinlik.aciklama|truncatewords:20 }}</p>
                 <div class="event-footer">
-                    <div class="participants" data-etkinlik-id="{{ etkinlik.id }}">👥 {{ etkinlik.katilimci_sayisi }}
-                        katılımcı</div>
-                    <button class="btn-join" data-etkinlik-id="{{ etkinlik.id }}">
-                        Katıl
+                    <div class="participants" data-etkinlik-id="{{ etkinlik.id }}">{{ etkinlik.katilimci_sayisi }} katılımcı</div>
+                    <button class="btn-join" 
+                            data-etkinlik-id="{{ etkinlik.id }}"
+                            data-katildi="{% if etkinlik.katildi_mi %}true{% else %}false{% endif %}"
+                            style="{% if etkinlik.katildi_mi %}background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);{% endif %}">
+                        {% if etkinlik.katildi_mi %}Katıldınız ✓{% else %}Katıl{% endif %}
                     </button>
                 </div>
             </div>
@@ -266,7 +266,7 @@
         {% else %}
         <div
             style="grid-column: 1/-1; text-align: center; padding: 80px 40px; background: white; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.08);">
-            <div style="font-size: 64px; margin-bottom: 20px;">🎪</div>
+            <div style="font-size: 24px; margin-bottom: 20px; color: #e74c3c; font-weight: bold;">Etkinlik Yok</div>
             <h3 style="font-size: 24px; color: #333; margin-bottom: 10px;">Henüz Etkinlik Bulunmuyor</h3>
             <p style="color: #999; font-size: 16px; margin-bottom: 20px;">Yeni etkinlikler yakında eklenecek. Etkinlik
                 önermek için aşağıdaki butona tıklayın!</p>
@@ -310,13 +310,13 @@
                 .then(data => {
                     if (data.success) {
                         if (data.katildi) {
-                            this.textContent = 'Katıldınız ✓';
+                            this.textContent = 'Katıldınız';
                             this.style.background = 'linear-gradient(135deg, #27ae60 0%, #2ecc71 100%)';
                             this.setAttribute('data-katildi', 'true');
 
                             const card = this.closest('.event-card');
                             const title = card.querySelector('.event-title').textContent;
-                            showToast(`"${title}" etkinliğine başarıyla katıldınız! 🎉`);
+                            showToast(`"${title}" etkinliğine başarıyla katıldınız!`);
                         } else {
                             this.textContent = 'Katıl';
                             this.style.background = 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)';
@@ -326,7 +326,7 @@
 
                         // Katılımcı sayısını güncelle
                         const participantDiv = this.parentElement.querySelector('.participants');
-                        participantDiv.innerHTML = `👥 ${data.katilimci_sayisi} katılımcı`;
+                        participantDiv.innerHTML = `${data.katilimci_sayisi} katılımcı`;
                     }
                 })
                 .catch(error => {

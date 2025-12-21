@@ -1,11 +1,480 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>INDEX</title>
-</head>
-<body>
-    <h1>HOME PAGE</h1>
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block title %}Doğuştan Sosyal - Ana Sayfa{% endblock %}
+{% block page_title %}Merhaba, {{ user.username }}!{% endblock %}
+{% block page_subtitle %}Bugün seni neler bekliyor bakalım?{% endblock %}
+
+{% block extra_styles %}
+<style>
+    /* Quick Actions */
+    .quick-actions {
+        margin-bottom: 40px;
+    }
+
+    .section-title {
+        font-size: 22px;
+        font-weight: 600;
+        color: #1a202c;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .action-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 18px;
+    }
+
+    .action-card {
+        background: white;
+        padding: 25px;
+        border-radius: 14px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 2px solid #e2e8f0;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .action-card:hover {
+        border-color: #e74c3c;
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(231, 76, 60, 0.15);
+    }
+
+    .action-icon {
+        font-size: 48px;
+        margin-bottom: 12px;
+    }
+
+    .action-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #2d3748;
+    }
+
+    /* Recent Activity */
+    .activity-section {
+        background: white;
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .activity-list {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .activity-item {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 15px;
+        border-radius: 10px;
+        background: #f7fafc;
+        transition: all 0.2s;
+    }
+
+    .activity-item:hover {
+        background: #edf2f7;
+    }
+
+    .activity-icon {
+        font-size: 32px;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: white;
+        border-radius: 12px;
+    }
+
+    .activity-content {
+        flex: 1;
+    }
+
+    .activity-title {
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 4px;
+    }
+
+    .activity-time {
+        font-size: 13px;
+        color: #718096;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px;
+        color: #718096;
+    }
+
+    .empty-state-icon {
+        font-size: 64px;
+        margin-bottom: 15px;
+    }
+
+    /* Devamsızlık Mini Widget */
+    .attendance-widget {
+        background: white;
+        padding: 20px;
+        border-radius: 16px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        margin-bottom: 25px;
+        flex: 1;
+        min-width: 300px;
+    }
+
+    .mini-course-card {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #e74c3c15 0%, #c0392b15 100%);
+        margin-bottom: 8px;
+        border-left: 3px solid #e74c3c;
+        text-decoration: none;
+        color: inherit;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .mini-course-card:hover {
+        transform: translateX(5px);
+        box-shadow: 0 4px 12px rgba(231, 76, 60, 0.2);
+    }
+
+    .mini-course-card.warning {
+        border-left-color: #f39c12;
+        background: linear-gradient(135deg, #f39c1215 0%, #e67e2215 100%);
+    }
+
+    .mini-course-card.danger {
+        border-left-color: #e74c3c;
+        background: linear-gradient(135deg, #e74c3c15 0%, #c0392b15 100%);
+    }
+
+    .mini-course-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .mini-course-name {
+        font-size: 13px;
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .mini-course-stats {
+        font-size: 11px;
+        color: #718096;
+    }
+
+    .mini-progress-bar {
+        width: 60px;
+        height: 5px;
+        background: #e2e8f0;
+        border-radius: 10px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .mini-progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #e74c3c 0%, #c0392b 100%);
+        border-radius: 10px;
+        transition: width 0.3s ease;
+    }
+
+    .mini-progress-fill.warning {
+        background: linear-gradient(90deg, #f39c12 0%, #e67e22 100%);
+    }
+
+    .mini-progress-fill.danger {
+        background: linear-gradient(90deg, #e74c3c 0%, #c0392b 100%);
+    }
+
+    .mini-percentage {
+        font-size: 14px;
+        font-weight: 700;
+        min-width: 42px;
+        text-align: right;
+    }
+
+    .mini-percentage.success {
+        color: #e74c3c;
+    }
+
+    .mini-percentage.warning {
+        color: #f39c12;
+    }
+
+    .mini-percentage.danger {
+        color: #e74c3c;
+    }
+
+    /* Haftalık Takvim Mini Widget */
+    .weekly-calendar-widget {
+        background: white;
+        padding: 20px;
+        border-radius: 16px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        margin-bottom: 25px;
+        flex: 2;
+        min-width: 400px;
+    }
+
+    .widget-container {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+        align-items: flex-start;
+    }
+
+    .week-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .day-card {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 12px;
+        min-height: 120px;
+        display: flex;
+        flex-direction: column;
+        border: 2px solid transparent;
+        transition: all 0.3s ease;
+    }
+
+    .day-card:hover {
+        border-color: #e74c3c;
+        box-shadow: 0 4px 12px rgba(231, 76, 60, 0.15);
+        transform: translateY(-2px);
+    }
+
+    .day-card.today {
+        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        color: white;
+        border-color: #e74c3c;
+    }
+
+    .day-header {
+        text-align: center;
+        margin-bottom: 8px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .day-card.today .day-header {
+        border-bottom-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .day-name {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 4px;
+    }
+
+    .day-number {
+        font-size: 20px;
+        font-weight: 800;
+    }
+
+    .day-events {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .day-event {
+        font-size: 10px;
+        padding: 4px 6px;
+        border-radius: 6px;
+        font-weight: 600;
+        line-height: 1.3;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+
+    .day-event.sinav {
+        background: #e74c3c;
+        color: white;
+    }
+
+    .day-event.odev {
+        background: #f39c12;
+        color: white;
+    }
+
+    .day-event.proje {
+        background: #9b59b6;
+        color: white;
+    }
+
+    .day-event.tatil {
+        background: #3498db;
+        color: white;
+    }
+
+    .day-event.diger {
+        background: #95a5a6;
+        color: white;
+    }
+
+    .day-card.today .day-event {
+        background: rgba(255, 255, 255, 0.25);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.4);
+    }
+
+    .no-events {
+        font-size: 10px;
+        color: #95a5a6;
+        text-align: center;
+        padding: 8px;
+        font-style: italic;
+    }
+
+    .day-card.today .no-events {
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    @media (max-width: 768px) {
+        .action-cards {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .week-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .attendance-widget,
+        .weekly-calendar-widget {
+            width: 100%;
+        }
+
+        .widget-container {
+            flex-direction: column;
+        }
+
+        .mini-course-card {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .mini-progress-bar {
+            width: 100%;
+        }
+
+        .mini-percentage {
+            text-align: left;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Widget Container -->
+<div class="widget-container">
+    <!-- Devamsızlık Mini Widget -->
+    {% if ders_istatistikleri %}
+    <div class="attendance-widget">
+        <h2 class="section-title">Devamsızlık Durumu</h2>
+        <div style="margin-bottom: 15px;">
+            {% for istatistik in ders_istatistikleri %}
+            <a href="/Akademik/devamsizlik-takvimi" class="mini-course-card {% if istatistik.devam_yuzdesi < istatistik.devam_zorunlulugu %}danger{% elif istatistik.devam_yuzdesi < 85 %}warning{% endif %}">
+                <div class="mini-course-info">
+                    <div class="mini-course-name">{{ istatistik.ders.ders_adi }}</div>
+                    <div class="mini-course-stats">
+                        {{ istatistik.devamsiz_saat }}/{{ istatistik.toplam_saat }} saat • {{ istatistik.kalan_hak }} hak
+                    </div>
+                </div>
+                <div class="mini-progress-bar">
+                    <div class="mini-progress-fill {% if istatistik.devam_yuzdesi < istatistik.devam_zorunlulugu %}danger{% elif istatistik.devam_yuzdesi < 85 %}warning{% endif %}" style="width: {{ istatistik.devam_yuzdesi }}%;"></div>
+                </div>
+                <div class="mini-percentage {% if istatistik.devam_yuzdesi < istatistik.devam_zorunlulugu %}danger{% elif istatistik.devam_yuzdesi < 85 %}warning{% else %}success{% endif %}">
+                    {{ istatistik.devam_yuzdesi }}%
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        <a href="/Akademik/devamsizlik-takvimi" style="color: #e74c3c; font-size: 13px; font-weight: 600; text-decoration: none;">
+            Tümünü Gör →
+        </a>
+    </div>
+    {% endif %}
+
+    <!-- Haftalık Takvim Mini Widget -->
+    <div class="weekly-calendar-widget">
+        <h2 class="section-title">Bu Hafta</h2>
+        <div class="week-grid">
+            {% for gun in gunler %}
+            <div class="day-card {% if gun.bugun_mu %}today{% endif %}">
+                <div class="day-header">
+                    <div class="day-name">{{ gun.gun_kisa }}</div>
+                    <div class="day-number">{{ gun.gun_numarasi }}</div>
+                </div>
+                <div class="day-events">
+                    {% if gun.etkinlikler %}
+                        {% for etkinlik in gun.etkinlikler %}
+                        <div class="day-event {{ etkinlik.tip }}" title="{{ etkinlik.baslik }} - {{ etkinlik.aciklama }}">
+                            {{ etkinlik.baslik }}
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="no-events">—</div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <a href="/Akademik/akademik-takvim" style="color: #667eea; font-size: 13px; font-weight: 600; text-decoration: none;">
+            Tüm Takvimi Gör →
+        </a>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="quick-actions">
+    <h2 class="section-title">Hızlı İşlemler</h2>
+    <div class="action-cards">
+        <a href="/Akademik/randevu-sistemi" class="action-card">
+            <div class="action-title">Randevu Al</div>
+        </a>
+
+        <a href="/Akademik/devamsizlik-takvimi" class="action-card">
+            <div class="action-title">Devamsızlık Takvimi</div>
+        </a>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="activity-section">
+    <h2 class="section-title">Son Aktiviteler</h2>
+    <div class="activity-list">
+        <div class="empty-state">
+            <p>Henüz herhangi bir aktivite yok.</p>
+            <p style="font-size: 14px; margin-top: 8px;">Etkinliklere katılarak başlayabilirsin!</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

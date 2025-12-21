@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}Kulüpler - DoğustanSosyal{% endblock %}
-{% block page_title %}👥 Kulüpler{% endblock %}
+{% block page_title %}Kulüpler{% endblock %}
 {% block page_subtitle %}İlgi alanına uygun kulüpleri bul ve üye ol!{% endblock %}
 
 {% block extra_styles %}
@@ -123,7 +123,7 @@
                 <p class="club-description">{{ kulup.aciklama|truncatewords:20 }}</p>
                 <div class="club-stats">
                     <div class="club-stat">
-                        <div class="stat-number">{{ kulup.uye_sayisi }}</div>
+                        <div class="stat-number uye-sayisi" data-kulup-id="{{ kulup.id }}">{{ kulup.uye_sayisi }}</div>
                         <div class="stat-label">Üye</div>
                     </div>
                     <div class="club-stat">
@@ -131,8 +131,11 @@
                         <div class="stat-label">Etkinlik</div>
                     </div>
                 </div>
-                <button class="btn-join-club">
-                    {% if user in kulup.uyeler.all %}Katıldınız ✓{% else %}Katıl{% endif %}
+                <button class="btn-join-club" 
+                        data-kulup-id="{{ kulup.id }}" 
+                        data-katildi="{% if kulup.katildi_mi %}true{% else %}false{% endif %}"
+                        style="{% if kulup.katildi_mi %}background: #27ae60;{% endif %}">
+                    {% if kulup.katildi_mi %}Katıldınız ✓{% else %}Katıl{% endif %}
                 </button>
             </div>
             {% endfor %}
@@ -153,8 +156,40 @@
     document.querySelectorAll('.btn-join-club').forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.stopPropagation();
-            this.textContent = 'Katıldınız ✓';
-            this.style.background = '#27ae60';
+            const kulupId = this.getAttribute('data-kulup-id');
+            const button = this;
+            
+            fetch(`/Sosyal/kulup/${kulupId}/katil/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    if (data.katildi) {
+                        button.textContent = 'Katıldınız ✓';
+                        button.style.background = '#27ae60';
+                        button.setAttribute('data-katildi', 'true');
+                    } else {
+                        button.textContent = 'Katıl';
+                        button.style.background = 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)';
+                        button.setAttribute('data-katildi', 'false');
+                    }
+                    // Üye sayısını güncelle
+                    const uyeSayisiDiv = document.querySelector(`.uye-sayisi[data-kulup-id="${kulupId}"]`);
+                    if (uyeSayisiDiv) {
+                        uyeSayisiDiv.textContent = data.uye_sayisi;
+                    }
+                } else {
+                    alert('Hata: ' + (data.error || 'Bir sorun oluştu'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Bağlantı hatası oluştu');
+            });
         });
     });
 </script>

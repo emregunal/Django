@@ -3,5 +3,6 @@ from django.urls import path
 
 
 urlpatterns = [
-    path('randevuSistemi/', views.randevuSistemi),
+    path('randevu-sistemi/', views.randevuSistemi, name='randevu-sistemi'),
+    path('randevu-yonetim/', views.randevuYonetim, name='randevu-yonetim'),
 ]

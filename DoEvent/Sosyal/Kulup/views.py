@@ -1,5 +1,7 @@
 from django.shortcuts import render
 from django.http.response import HttpResponse
+from django.contrib.auth.decorators import login_required
 
-def kulup(request):
+@login_required(login_url='/Kullanıcılar/login/')
+def kulup(request, id):
     return render(request, "kulup.html")

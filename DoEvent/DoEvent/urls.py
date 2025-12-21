@@ -19,11 +19,16 @@ from django.urls import path,include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('Core.urls')),
+    path('', include('Core.urls')),  # Ana sayfa
+    path('Kullanıcılar/', include('Kullanıcılar.urls')),
     path('Akademik/', include('Akademik.urls')),
     path('Akademik/', include('Akademik.AkademikTakvim.urls')),
     path('Akademik/', include('Akademik.DevamsizlikTakvimi.urls')),
     path('Akademik/', include('Akademik.RandevuSistemi.urls')),
     path('Sosyal/', include('Sosyal.urls')),
-    path('Sosyal/', include('Sosyal.Etkinlik.url')),
+    path('Sosyal/', include('Sosyal.Etkinlik.urls')),
+    path('Sosyal/', include('Sosyal.EtkinlikOner.urls')),
+    path('Sosyal/', include('Sosyal.Kulup.urls')),
+    path('Sosyal/', include('Sosyal.KulupOner.urls')),
+    
 ]

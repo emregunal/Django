@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'Kullanıcılar',
     'Core',
     'Akademik.AkademikTakvim',
     'Akademik.DevamsizlikTakvimi',
@@ -84,8 +85,12 @@ WSGI_APPLICATION = 'DoEvent.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'doevent_db',          # DBeaver'da oluşturduğunuz veritabanı adı
+        'USER': 'postgres',            # PostgreSQL kullanıcı adınız
+        'PASSWORD': '12345',   # PostgreSQL şifreniz
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 
@@ -112,9 +117,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'tr'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Istanbul'
 
 USE_I18N = True
 
@@ -124,9 +129,17 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    BASE_DIR / 'Kullanıcılar' / 'static',
+]
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Auth settings
+LOGIN_REDIRECT_URL = '/'  # Başarılı girişten sonra ana sayfaya yönlendir
+LOGOUT_REDIRECT_URL = '/'  # Çıkıştan sonra ana sayfaya yönlendir
