@@ -22,7 +22,8 @@ def authenticate_admin(username, password):
             return None
         
         # Sadece admin rollerine sahip kullanıcıların giriş yapmasına izin ver
-        if kullanici.rol in ['superadmin', 'club_moderator', 'instructor', 'ogretmen']:
+        # club_moderator artık ayrı kulüp panelini kullanıyor
+        if kullanici.rol in ['superadmin', 'instructor', 'ogretmen']:
             return kullanici.rol
         
         return None

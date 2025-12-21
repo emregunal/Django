@@ -1,0 +1,312 @@
+{% extends "base.html" %}
+
+{% block title %}Profilim - DoğustanSosyal{% endblock %}
+{% block page_title %}Profilim{% endblock %}
+{% block page_subtitle %}Hesap bilgilerinizi görüntüleyin{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .profile-container {
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 0 20px;
+    }
+
+    .profile-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
+
+    .profile-header {
+        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        padding: 40px;
+        color: white;
+        text-align: center;
+        position: relative;
+    }
+
+    .profile-avatar {
+        width: 100px;
+        height: 100px;
+        background: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 42px;
+        margin: 0 auto 20px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .profile-name {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+
+    .profile-role {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 13px;
+        display: inline-block;
+        backdrop-filter: blur(5px);
+    }
+
+    .profile-body {
+        padding: 40px;
+    }
+
+    .info-section {
+        margin-bottom: 30px;
+    }
+
+    .section-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #7f8c8d;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .section-title::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: linear-gradient(to right, #e0e0e0, transparent);
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+    }
+
+    .info-item {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 12px;
+        border-left: 4px solid #e74c3c;
+        transition: all 0.3s ease;
+    }
+
+    .info-item:hover {
+        transform: translateX(5px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .info-label {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #95a5a6;
+        margin-bottom: 8px;
+        font-weight: 600;
+    }
+
+    .info-value {
+        font-size: 18px;
+        font-weight: 600;
+        color: #2c3e50;
+        word-break: break-word;
+    }
+
+    .info-value.empty {
+        color: #bdc3c7;
+        font-style: italic;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #e74c3c;
+        text-decoration: none;
+        font-weight: 500;
+        margin-bottom: 20px;
+        transition: all 0.3s;
+    }
+
+    .back-link:hover {
+        gap: 12px;
+    }
+
+    .info-item.editable {
+        border-left-color: #3498db;
+    }
+
+    .edit-input {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        color: #2c3e50;
+        transition: all 0.3s;
+        background: white;
+    }
+
+    .edit-input:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.1);
+    }
+
+    .save-btn {
+        background: linear-gradient(135deg, #27ae60 0%, #219a52 100%);
+        color: white;
+        border: none;
+        padding: 14px 30px;
+        border-radius: 10px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 20px;
+        width: 100%;
+        transition: all 0.3s;
+    }
+
+    .save-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(39, 174, 96, 0.3);
+    }
+
+    @media (max-width: 600px) {
+        .profile-header {
+            padding: 30px 20px;
+        }
+        
+        .profile-body {
+            padding: 25px;
+        }
+
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .profile-name {
+            font-size: 22px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <a href="{% url 'index' %}" class="back-link">
+        ← Ana Sayfaya Dön
+    </a>
+
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}" style="background: {% if message.tags == 'success' %}#d4edda{% else %}#f8d7da{% endif %}; color: {% if message.tags == 'success' %}#155724{% else %}#721c24{% endif %}; padding: 15px 20px; border-radius: 10px; margin-bottom: 20px;">
+            {{ message }}
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="profile-card">
+        <div class="profile-header">
+            <div class="profile-avatar">👤</div>
+            <div class="profile-name">{{ kullanici.isim|default:kullanici.kullanici_adi }}</div>
+            <div class="profile-role">{{ kullanici.get_rol_display }}</div>
+        </div>
+
+        <div class="profile-body">
+            <!-- Editable Section -->
+            <form method="POST">
+                {% csrf_token %}
+                <div class="info-section">
+                    <div class="section-title">
+                        <span>✏️</span> Düzenlenebilir Bilgiler
+                    </div>
+
+                    <div class="info-grid">
+                        <div class="info-item editable">
+                            <div class="info-label">Kullanıcı Adı</div>
+                            <input type="text" name="kullanici_adi" class="edit-input" value="{{ kullanici.kullanici_adi }}" required>
+                        </div>
+
+                        <div class="info-item editable">
+                            <div class="info-label">Ad Soyad</div>
+                            <input type="text" name="isim" class="edit-input" value="{{ kullanici.isim|default:'' }}" placeholder="Ad Soyad giriniz">
+                        </div>
+
+                        <div class="info-item editable">
+                            <div class="info-label">Bölüm</div>
+                            <input type="text" name="bolum" class="edit-input" value="{{ kullanici.bolum|default:'' }}" placeholder="Bölümünüzü giriniz">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="save-btn">
+                        💾 Değişiklikleri Kaydet
+                    </button>
+                </div>
+            </form>
+
+            <!-- Read-only Section -->
+            <div class="info-section">
+                <div class="section-title">
+                    <span>📋</span> Diğer Bilgiler
+                </div>
+
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">E-posta Adresi</div>
+                        <div class="info-value {% if not kullanici.email %}empty{% endif %}">
+                            {{ kullanici.email|default:"Belirtilmemiş" }}
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-label">Okul Numarası</div>
+                        <div class="info-value {% if not kullanici.okul_numarasi %}empty{% endif %}">
+                            {{ kullanici.okul_numarasi|default:"Belirtilmemiş" }}
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-label">Hesap Durumu</div>
+                        <div class="info-value" style="color: {% if kullanici.aktif %}#27ae60{% else %}#e74c3c{% endif %};">
+                            {% if kullanici.aktif %}✓ Aktif{% else %}✗ Pasif{% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <div class="section-title">
+                    <span>🕐</span> Oturum Bilgileri
+                </div>
+
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Kayıt Tarihi</div>
+                        <div class="info-value">
+                            {{ kullanici.olusturma_tarihi|date:"d F Y, H:i" }}
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-label">Son Giriş</div>
+                        <div class="info-value {% if not kullanici.son_giris %}empty{% endif %}">
+                            {% if kullanici.son_giris %}
+                                {{ kullanici.son_giris|date:"d F Y, H:i" }}
+                            {% else %}
+                                Bilgi yok
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

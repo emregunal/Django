@@ -180,23 +180,29 @@
             position: absolute;
             top: 30px;
             right: 30px;
-            width: 36px;
-            height: 36px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
+            font-size: 20px;
             font-weight: bold;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.25);
             cursor: pointer;
             transition: all 0.3s ease;
             z-index: 1002;
             line-height: 1;
+            border: 2px solid rgba(231, 76, 60, 0.3);
+            padding-bottom: 2px;
+            text-align: center;
         }
 
         .close-btn:hover {
             transform: scale(1.1) rotate(90deg);
+            background: #e74c3c;
+            color: white;
+            border-color: #e74c3c;
         }
 
         .detail-content {
@@ -205,6 +211,8 @@
             transition: opacity 0.3s 0.2s;
             overflow-y: auto;
             height: 100%;
+            position: relative;
+            z-index: 1;
         }
 
         .detail-card-clone.active .detail-content {
@@ -320,6 +328,23 @@
             color: #155724;
             font-size: 16px;
         }
+
+        .btn-remove-president {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-remove-president:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+        }
     </style>
 {% endblock %}
 
@@ -434,9 +459,14 @@
         let currentPresidentBox = '';
         if (hasPresident) {
             currentPresidentBox = `
-                <div class="current-president-box">
-                    <div class="current-president-label">Mevcut Başkan</div>
-                    <div class="current-president-name">👤 ${data.baskanIsim || data.baskanUsername}</div>
+                <div class="current-president-box" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div class="current-president-label">Mevcut Başkan</div>
+                        <div class="current-president-name">👤 ${data.baskanIsim || data.baskanUsername}</div>
+                    </div>
+                    <button type="button" class="btn-remove-president" onclick="removePresident('${data.id}')">
+                        🗑️ Kaldır
+                    </button>
                 </div>
             `;
         }
@@ -546,6 +576,34 @@
     function getCSRFToken() {
         const cookie = document.cookie.split(';').find(c => c.trim().startsWith('csrftoken='));
         return cookie ? cookie.split('=')[1] : '';
+    }
+
+    function removePresident(clubId) {
+        if (!confirm('Bu kulüp başkanını kaldırmak istediğinize emin misiniz?')) {
+            return;
+        }
+        
+        fetch('/admin-panel/remove-president/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': getCSRFToken()
+            },
+            body: `club_id=${clubId}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Başkan başarıyla kaldırıldı!');
+                window.location.reload();
+            } else {
+                alert('Hata: ' + (data.error || 'Bir hata oluştu'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Bir hata oluştu.');
+        });
     }
 
     overlay.addEventListener('click', closeDetail);

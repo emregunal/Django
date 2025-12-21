@@ -30,6 +30,7 @@ from Core.admin_views import (
     reject_club,
     delete_club,
     assign_club_president,
+    remove_club_president,
 )
 
 urlpatterns = [
@@ -63,5 +64,6 @@ urlpatterns = [
     path('clubs/reject/<str:club_id>/', reject_club, name='reject_club'),
     path('clubs/delete/<str:club_id>/', delete_club, name='delete_club'),
     path('clubs/assign-president/', assign_club_president, name='assign_club_president'),
+    path('remove-president/', remove_club_president, name='remove_club_president'),
 ]
 

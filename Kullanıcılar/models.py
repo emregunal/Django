@@ -19,6 +19,7 @@ class Kullanici(models.Model):
     email = models.EmailField(blank=True, null=True, verbose_name='E-posta')
     isim = models.CharField(max_length=150, blank=True, null=True, verbose_name='Ad Soyad')
     bolum = models.CharField(max_length=200, blank=True, null=True, verbose_name='Bölüm')
+    okul_numarasi = models.CharField(max_length=20, blank=True, null=True, verbose_name='Okul Numarası')
     rol = models.CharField(max_length=20, choices=ROL_CHOICES, default='user', verbose_name='Rol')
     aktif = models.BooleanField(default=True, verbose_name='Aktif')
     olusturma_tarihi = models.DateTimeField(auto_now_add=True, verbose_name='Oluşturulma Tarihi')

@@ -48,10 +48,11 @@ def create_initial_users():
         {
             'kullanici_adi': 'testuser',
             'password': 'test123',
-            'email': 'test@dogustansosyal.com',
+            'email': '202303011100@dogus.edu.tr',
             'rol': 'user',
             'isim': 'Eren Turna',
             'bolum': 'Yazılım Mühendisliği',
+            'okul_numarasi': '202303011100',
         },
         {
             'kullanici_adi': 'ogretmen1',
@@ -80,6 +81,7 @@ def create_initial_users():
             rol=user_data['rol'],
             isim=user_data.get('isim', ''),
             bolum=user_data.get('bolum', ''),
+            okul_numarasi=user_data.get('okul_numarasi', ''),
             aktif=True,
         )
         kullanici.set_password(user_data['password'])

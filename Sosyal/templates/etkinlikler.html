@@ -216,10 +216,209 @@
         transform: scale(1.05);
         box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
     }
+
+    /* ===== Hero Animation Modal ===== */
+    .detail-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .detail-modal-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .detail-card-clone {
+        position: fixed;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 15px 50px rgba(0,0,0,0.3);
+        z-index: 1000;
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .detail-card-clone.fullscreen {
+        border-radius: 0;
+    }
+
+    .close-btn {
+        background: white;
+        color: #e74c3c;
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        font-weight: bold;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        z-index: 1002;
+        line-height: 1;
+        border: 2px solid rgba(231, 76, 60, 0.3);
+        padding-bottom: 2px;
+    }
+
+    .close-btn:hover {
+        transform: scale(1.1) rotate(90deg);
+        background: #e74c3c;
+        color: white;
+        border-color: #e74c3c;
+    }
+
+    .detail-content {
+        padding: 0;
+        opacity: 0;
+        transition: opacity 0.3s 0.2s;
+        overflow-y: auto;
+        height: 100%;
+    }
+
+    .detail-card-clone.active .detail-content {
+        opacity: 1;
+    }
+
+    .detail-header {
+        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        padding: 50px 40px;
+        color: white;
+        position: relative;
+    }
+
+    .detail-category-badge {
+        background: rgba(255,255,255,0.2);
+        padding: 8px 18px;
+        border-radius: 25px;
+        font-size: 14px;
+        display: inline-block;
+        margin-bottom: 15px;
+        backdrop-filter: blur(5px);
+    }
+
+    .detail-title {
+        font-size: 36px;
+        font-weight: 700;
+        margin-bottom: 15px;
+    }
+
+    .detail-meta {
+        display: flex;
+        gap: 25px;
+        flex-wrap: wrap;
+        font-size: 15px;
+        opacity: 0.9;
+    }
+
+    .detail-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .detail-body {
+        padding: 40px;
+    }
+
+    .detail-section {
+        margin-bottom: 30px;
+    }
+
+    .detail-section-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .detail-description {
+        font-size: 16px;
+        line-height: 1.8;
+        color: #555;
+    }
+
+    .detail-info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+    }
+
+    .detail-info-card {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 12px;
+        border-left: 4px solid #e74c3c;
+    }
+
+    .detail-info-label {
+        font-size: 12px;
+        text-transform: uppercase;
+        color: #95a5a6;
+        margin-bottom: 5px;
+    }
+
+    .detail-info-value {
+        font-size: 16px;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .detail-join-btn {
+        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        color: white;
+        border: none;
+        padding: 16px 40px;
+        border-radius: 30px;
+        font-size: 18px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .detail-join-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(231, 76, 60, 0.4);
+    }
+
+    .detail-join-btn.joined {
+        background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+    }
 </style>
 {% endblock %}
 
 {% block content %}
+<!-- Modal Overlay -->
+<div id="modalOverlay" class="detail-modal-overlay"></div>
+
+<!-- Detail Modal Container -->
+<div id="detailCard" class="detail-card-clone" style="display: none;">
+    <div class="close-btn" onclick="closeDetail()">✕</div>
+    <div class="detail-content" id="detailContent">
+        <!-- Content injected by JS -->
+    </div>
+</div>
+
 <div class="events-container">
     <div class="filter-section">
         <button class="filter-btn active">Tümü</button>
@@ -238,7 +437,17 @@
     <div class="events-grid">
         {% if etkinlikler %}
         {% for etkinlik in etkinlikler %}
-        <div class="event-card" data-kategori="{{ etkinlik.kategori }}">
+        <div class="event-card" 
+             data-id="{{ etkinlik.id }}"
+             data-baslik="{{ etkinlik.baslik }}"
+             data-kategori="{{ etkinlik.kategori }}"
+             data-aciklama="{{ etkinlik.aciklama }}"
+             data-tarih="{{ etkinlik.tarih|date:'d F Y, l' }}"
+             data-saat="{{ etkinlik.baslangic_saati }} - {{ etkinlik.bitis_saati }}"
+             data-konum="{{ etkinlik.konum }}"
+             data-katilimci="{{ etkinlik.katilimci_sayisi }}"
+             data-katildi="{% if etkinlik.katildi_mi %}true{% else %}false{% endif %}"
+             onclick="expandCard(this)">
             <div class="event-image">
                 {{ etkinlik.kategori|title }}
             </div>
@@ -256,6 +465,7 @@
                     <button class="btn-join" 
                             data-etkinlik-id="{{ etkinlik.id }}"
                             data-katildi="{% if etkinlik.katildi_mi %}true{% else %}false{% endif %}"
+                            onclick="event.stopPropagation(); joinEvent(this)"
                             style="{% if etkinlik.katildi_mi %}background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);{% endif %}">
                         {% if etkinlik.katildi_mi %}Katıldınız ✓{% else %}Katıl{% endif %}
                     </button>
@@ -281,58 +491,17 @@
 
 {% block extra_scripts %}
 <script>
+    // Modal Elements
+    const overlay = document.getElementById('modalOverlay');
+    const detailCard = document.getElementById('detailCard');
+    const content = document.getElementById('detailContent');
+    let activeCard = null;
+
     // Filter buttons
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', function () {
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
             this.classList.add('active');
-        });
-    });
-
-    // Join buttons - AJAX ile database'e kaydet
-    document.querySelectorAll('.btn-join').forEach(btn => {
-        btn.addEventListener('click', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            const etkinlikId = this.getAttribute('data-etkinlik-id');
-            const katildi = this.getAttribute('data-katildi') === 'true';
-
-            // AJAX isteği gönder
-            fetch(`/Sosyal/etkinlik/${etkinlikId}/katil/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken')
-                }
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        if (data.katildi) {
-                            this.textContent = 'Katıldınız';
-                            this.style.background = 'linear-gradient(135deg, #27ae60 0%, #2ecc71 100%)';
-                            this.setAttribute('data-katildi', 'true');
-
-                            const card = this.closest('.event-card');
-                            const title = card.querySelector('.event-title').textContent;
-                            showToast(`"${title}" etkinliğine başarıyla katıldınız!`);
-                        } else {
-                            this.textContent = 'Katıl';
-                            this.style.background = 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)';
-                            this.setAttribute('data-katildi', 'false');
-                            showToast('Etkinlikten ayrıldınız.');
-                        }
-
-                        // Katılımcı sayısını güncelle
-                        const participantDiv = this.parentElement.querySelector('.participants');
-                        participantDiv.innerHTML = `${data.katilimci_sayisi} katılımcı`;
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    showToast('Bir hata oluştu. Lütfen tekrar deneyin.');
-                });
         });
     });
 
@@ -352,39 +521,241 @@
         return cookieValue;
     }
 
-    // Event card click - Sadece kart alanına tıklandığında çalışır
-    document.querySelectorAll('.event-card').forEach(card => {
-        card.addEventListener('click', function (e) {
-            // Eğer butona tıklanmadıysa
-            if (!e.target.closest('.btn-join')) {
-                const title = this.querySelector('.event-title').textContent;
-                showToast(`${title} - Detaylar yakında eklenecek!`);
+    // Join Event Function
+    function joinEvent(btn) {
+        const etkinlikId = btn.getAttribute('data-etkinlik-id');
+        
+        fetch(`/Sosyal/etkinlik/${etkinlikId}/katil/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
             }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                if (data.katildi) {
+                    btn.textContent = 'Katıldınız ✓';
+                    btn.style.background = 'linear-gradient(135deg, #27ae60 0%, #2ecc71 100%)';
+                    btn.setAttribute('data-katildi', 'true');
+                    showToast('Etkinliğe başarıyla katıldınız!');
+                } else {
+                    btn.textContent = 'Katıl';
+                    btn.style.background = 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)';
+                    btn.setAttribute('data-katildi', 'false');
+                    showToast('Etkinlikten ayrıldınız.');
+                }
+                
+                // Update participant count in card
+                const card = btn.closest('.event-card');
+                if (card) {
+                    const participantDiv = card.querySelector('.participants');
+                    if (participantDiv) {
+                        participantDiv.textContent = `${data.katilimci_sayisi} katılımcı`;
+                    }
+                    // Update data attribute
+                    card.setAttribute('data-katilimci', data.katilimci_sayisi);
+                    card.setAttribute('data-katildi', data.katildi ? 'true' : 'false');
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('Bir hata oluştu. Lütfen tekrar deneyin.');
         });
-    });
+    }
 
-    // Toast notification fonksiyonu
+    // Expand Card - Hero Animation
+    function expandCard(card) {
+        activeCard = card;
+        const originalRect = card.getBoundingClientRect();
+        
+        // Get event data from card
+        const data = {
+            id: card.dataset.id,
+            baslik: card.dataset.baslik,
+            kategori: card.dataset.kategori,
+            aciklama: card.dataset.aciklama,
+            tarih: card.dataset.tarih,
+            saat: card.dataset.saat,
+            konum: card.dataset.konum,
+            katilimci: card.dataset.katilimci,
+            katildi: card.dataset.katildi === 'true'
+        };
+
+        // Build modal content
+        content.innerHTML = `
+            <div class="detail-header">
+                <div class="detail-category-badge">${data.kategori}</div>
+                <div class="detail-title">${data.baslik}</div>
+                <div class="detail-meta">
+                    <div class="detail-meta-item">📅 ${data.tarih}</div>
+                    <div class="detail-meta-item">🕐 ${data.saat}</div>
+                    <div class="detail-meta-item">📍 ${data.konum}</div>
+                </div>
+            </div>
+            <div class="detail-body">
+                <div class="detail-section">
+                    <div class="detail-section-title">📝 Etkinlik Hakkında</div>
+                    <p class="detail-description">${data.aciklama || 'Açıklama bulunmuyor.'}</p>
+                </div>
+                
+                <div class="detail-section">
+                    <div class="detail-section-title">📊 Etkinlik Bilgileri</div>
+                    <div class="detail-info-grid">
+                        <div class="detail-info-card">
+                            <div class="detail-info-label">Tarih</div>
+                            <div class="detail-info-value">${data.tarih}</div>
+                        </div>
+                        <div class="detail-info-card">
+                            <div class="detail-info-label">Saat</div>
+                            <div class="detail-info-value">${data.saat}</div>
+                        </div>
+                        <div class="detail-info-card">
+                            <div class="detail-info-label">Konum</div>
+                            <div class="detail-info-value">${data.konum}</div>
+                        </div>
+                        <div class="detail-info-card">
+                            <div class="detail-info-label">Katılımcı</div>
+                            <div class="detail-info-value">${data.katilimci} kişi</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="detail-section" style="text-align: center; padding-top: 20px;">
+                    <button class="detail-join-btn ${data.katildi ? 'joined' : ''}" 
+                            data-etkinlik-id="${data.id}"
+                            onclick="joinEventFromModal(this)">
+                        ${data.katildi ? '✓ Katıldınız' : '🎉 Etkinliğe Katıl'}
+                    </button>
+                </div>
+            </div>
+        `;
+
+        // Show overlay
+        overlay.classList.add('active');
+
+        // Set initial position (card position)
+        detailCard.style.display = 'flex';
+        detailCard.style.top = originalRect.top + 'px';
+        detailCard.style.left = originalRect.left + 'px';
+        detailCard.style.width = originalRect.width + 'px';
+        detailCard.style.height = originalRect.height + 'px';
+        detailCard.classList.remove('active', 'fullscreen');
+
+        // Force reflow
+        void detailCard.offsetWidth;
+
+        // Expand to center/fullscreen
+        const modalWidth = Math.min(800, window.innerWidth - 40);
+        const modalHeight = Math.min(700, window.innerHeight - 40);
+        
+        detailCard.style.top = ((window.innerHeight - modalHeight) / 2) + 'px';
+        detailCard.style.left = ((window.innerWidth - modalWidth) / 2) + 'px';
+        detailCard.style.width = modalWidth + 'px';
+        detailCard.style.height = modalHeight + 'px';
+
+        document.body.style.overflow = 'hidden';
+
+        setTimeout(() => {
+            detailCard.classList.add('active');
+        }, 300);
+    }
+
+    // Close Detail Modal
+    function closeDetail() {
+        if (!activeCard) return;
+
+        detailCard.classList.remove('active');
+        document.body.style.overflow = '';
+
+        const cardRect = activeCard.getBoundingClientRect();
+
+        // Animate back to card position
+        detailCard.style.top = cardRect.top + 'px';
+        detailCard.style.left = cardRect.left + 'px';
+        detailCard.style.width = cardRect.width + 'px';
+        detailCard.style.height = cardRect.height + 'px';
+
+        overlay.classList.remove('active');
+
+        setTimeout(() => {
+            detailCard.style.display = 'none';
+            activeCard = null;
+        }, 400);
+    }
+
+    // Join from modal
+    function joinEventFromModal(btn) {
+        const etkinlikId = btn.getAttribute('data-etkinlik-id');
+        
+        fetch(`/Sosyal/etkinlik/${etkinlikId}/katil/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                if (data.katildi) {
+                    btn.textContent = '✓ Katıldınız';
+                    btn.classList.add('joined');
+                    showToast('Etkinliğe başarıyla katıldınız!');
+                } else {
+                    btn.textContent = '🎉 Etkinliğe Katıl';
+                    btn.classList.remove('joined');
+                    showToast('Etkinlikten ayrıldınız.');
+                }
+                
+                // Also update the original card
+                if (activeCard) {
+                    activeCard.setAttribute('data-katildi', data.katildi ? 'true' : 'false');
+                    activeCard.setAttribute('data-katilimci', data.katilimci_sayisi);
+                    
+                    const cardBtn = activeCard.querySelector('.btn-join');
+                    if (cardBtn) {
+                        cardBtn.textContent = data.katildi ? 'Katıldınız ✓' : 'Katıl';
+                        cardBtn.style.background = data.katildi 
+                            ? 'linear-gradient(135deg, #27ae60 0%, #2ecc71 100%)'
+                            : 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)';
+                        cardBtn.setAttribute('data-katildi', data.katildi ? 'true' : 'false');
+                    }
+                    
+                    const participantDiv = activeCard.querySelector('.participants');
+                    if (participantDiv) {
+                        participantDiv.textContent = `${data.katilimci_sayisi} katılımcı`;
+                    }
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('Bir hata oluştu.');
+        });
+    }
+
+    // Toast notification
     function showToast(message) {
-        // Varsa eski toast'ı kaldır
         const oldToast = document.querySelector('.toast-notification');
-        if (oldToast) {
-            oldToast.remove();
-        }
+        if (oldToast) oldToast.remove();
 
         const toast = document.createElement('div');
         toast.className = 'toast-notification';
         toast.textContent = message;
         document.body.appendChild(toast);
 
-        // Animasyon için timeout
         setTimeout(() => toast.classList.add('show'), 100);
-
-        // 3 saniye sonra kaldır
         setTimeout(() => {
             toast.classList.remove('show');
             setTimeout(() => toast.remove(), 300);
         }, 3000);
     }
+
+    // Close on overlay click
+    overlay.addEventListener('click', closeDetail);
 </script>
 
 <style>

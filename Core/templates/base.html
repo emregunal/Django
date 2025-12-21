@@ -315,6 +315,18 @@
         .dropdown-item:hover {
             background: #f7fafc;
             color: #e74c3c;
+            padding-left: 20px;
+        }
+
+        .dropdown-arrow {
+            font-size: 10px;
+            color: #95a5a6;
+            transition: transform 0.3s ease;
+            margin-left: 5px;
+        }
+
+        .dropdown-arrow.open {
+            transform: rotate(180deg);
         }
 
         /* Main Content */
@@ -500,12 +512,17 @@
             </ul>
 
             <div class="user-section">
-                <div class="user-profile" id="userProfile">
+                <div class="user-profile" id="userProfile" onclick="toggleUserDropdown()">
                     <div class="user-avatar">{{ request.session.user_username.0|upper|default:"U" }}</div>
                     <span class="user-name">{{ request.session.user_username|default:"Kullanıcı" }}</span>
+                    <span class="dropdown-arrow" id="dropdownArrow">▼</span>
                     <div class="user-dropdown" id="userDropdown">
-                        <a href="{% url 'kullanicilar:logout' %}" class="dropdown-item">
-                            Çıkış Yap
+                        <a href="{% url 'kullanicilar:profile' %}" class="dropdown-item">
+                            <span>👤</span> Profilim
+                        </a>
+                        <div style="height: 1px; background: #eee; margin: 5px 0;"></div>
+                        <a href="{% url 'kullanicilar:logout' %}" class="dropdown-item" style="color: #e74c3c;">
+                            <span>🚪</span> Çıkış Yap
                         </a>
                     </div>
                 </div>
@@ -539,18 +556,26 @@
         // User Profile Dropdown
         const userProfile = document.getElementById('userProfile');
         const userDropdown = document.getElementById('userDropdown');
+        const dropdownArrow = document.getElementById('dropdownArrow');
 
-        if (userProfile) {
-            userProfile.addEventListener('click', (e) => {
-                e.stopPropagation();
-                userDropdown.classList.toggle('active');
-            });
+        function toggleUserDropdown(e) {
+            if (e) e.stopPropagation();
+            userDropdown.classList.toggle('active');
+            if (dropdownArrow) {
+                dropdownArrow.classList.toggle('open');
+            }
         }
 
+        // Make function globally accessible
+        window.toggleUserDropdown = toggleUserDropdown;
+
         // Close user dropdown when clicking outside
-        document.addEventListener('click', () => {
-            if (userDropdown) {
+        document.addEventListener('click', (e) => {
+            if (userDropdown && !e.target.closest('#userProfile')) {
                 userDropdown.classList.remove('active');
+                if (dropdownArrow) {
+                    dropdownArrow.classList.remove('open');
+                }
             }
         });
 

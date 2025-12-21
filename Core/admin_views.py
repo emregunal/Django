@@ -784,19 +784,51 @@ def assign_club_president(request):
     
     if request.method == 'POST':
         club_id = request.POST.get('club_id')
-        username = request.POST.get('username')
-        president_name = request.POST.get('president_name', '')
-        president_email = request.POST.get('president_email', '')
+        username = request.POST.get('username')  # This is the school number
+        president_name = request.POST.get('president_name', '').strip()
+        president_email = request.POST.get('president_email', '').strip()
         
         try:
             from Kullanıcılar.models import Kullanici
             
-            # Check user exists
-            user = Kullanici.objects.get(kullanici_adi=username)
-            
             # Check club exists
             if not club_id:
                 messages.error(request, 'Lütfen bir kulüp seçin.')
+                return redirect('assign_club_president')
+            
+            # First, try to find user by school number (username)
+            user = None
+            validation_errors = []
+            
+            # Search by school number (okul_numarasi)
+            try:
+                user = Kullanici.objects.get(okul_numarasi=username)
+            except Kullanici.DoesNotExist:
+                # Try by username as fallback
+                try:
+                    user = Kullanici.objects.get(kullanici_adi=username)
+                except Kullanici.DoesNotExist:
+                    validation_errors.append(f'Okul numarası veya kullanıcı adı "{username}" ile kayıtlı kullanıcı bulunamadı.')
+            
+            if user:
+                # Validate name matches
+                if president_name and user.isim:
+                    if president_name.lower() != user.isim.lower():
+                        validation_errors.append(f'Girilen isim ({president_name}) sistemdeki isimle ({user.isim}) eşleşmiyor.')
+                
+                # Validate email matches
+                if president_email and user.email:
+                    if president_email.lower() != user.email.lower():
+                        validation_errors.append(f'Girilen e-posta ({president_email}) sistemdeki e-posta ({user.email}) ile eşleşmiyor.')
+            
+            # If there are validation errors, show them
+            if validation_errors:
+                for error in validation_errors:
+                    messages.error(request, error)
+                return redirect('assign_club_president')
+            
+            if not user:
+                messages.error(request, 'Kullanıcı bulunamadı!')
                 return redirect('assign_club_president')
                 
             # Update User Role
@@ -810,17 +842,16 @@ def assign_club_president(request):
                     '$set': {
                         'baskan_id': user.id,
                         'baskan_username': user.kullanici_adi,
-                        'baskan_isim': president_name or user.isim or user.kullanici_adi,
-                        'baskan_email': president_email
+                        'baskan_isim': user.isim or president_name or user.kullanici_adi,
+                        'baskan_email': user.email or president_email,
+                        'baskan_okul_numarasi': user.okul_numarasi or username
                     }
                 }
             )
             
-            messages.success(request, f'{president_name or username} başarıyla kulüp başkanı olarak atandı!')
+            messages.success(request, f'{user.isim or user.kullanici_adi} başarıyla kulüp başkanı olarak atandı! ✓ Bilgiler doğrulandı.')
             return redirect('assign_club_president')
             
-        except Kullanici.DoesNotExist:
-            messages.error(request, 'Kullanıcı bulunamadı!')
         except Exception as e:
             messages.error(request, f'Hata oluştu: {str(e)}')
             
@@ -831,4 +862,68 @@ def assign_club_president(request):
         'clubs_with_president': clubs_with_president,
     }
     return render(request, 'admin/assign_president.html', context)
+
+
+@superadmin_required
+def remove_club_president(request):
+    """Remove president from a club"""
+    from django.http import JsonResponse
+    from Kullanıcılar.models import Kullanici
+    from Core.mongodb_utils import get_db
+    
+    db = get_db()
+    
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST required'})
+    
+    club_id = request.POST.get('club_id')
+    
+    if not club_id:
+        return JsonResponse({'success': False, 'error': 'Kulüp ID gerekli'})
+    
+    try:
+        # Get club info first to find current president
+        club = db.kulupler.find_one({'_id': ObjectId(club_id)})
+        
+        if not club:
+            return JsonResponse({'success': False, 'error': 'Kulüp bulunamadı'})
+        
+        # Get current president's user id
+        baskan_id = club.get('baskan_id')
+        baskan_username = club.get('baskan_username')
+        
+        # Reset user role to 'user' if found
+        if baskan_id:
+            try:
+                user = Kullanici.objects.get(id=baskan_id)
+                user.rol = 'user'
+                user.save()
+            except Kullanici.DoesNotExist:
+                pass
+        elif baskan_username:
+            try:
+                user = Kullanici.objects.get(kullanici_adi=baskan_username)
+                user.rol = 'user'
+                user.save()
+            except Kullanici.DoesNotExist:
+                pass
+        
+        # Remove president info from club
+        db.kulupler.update_one(
+            {'_id': ObjectId(club_id)},
+            {
+                '$unset': {
+                    'baskan_id': '',
+                    'baskan_username': '',
+                    'baskan_isim': '',
+                    'baskan_email': '',
+                    'baskan_okul_numarasi': ''
+                }
+            }
+        )
+        
+        return JsonResponse({'success': True})
+        
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
 

@@ -80,11 +80,12 @@ def login_view(request):
                         messages.error(request, 'Hesabınız devre dışı bırakılmış.')
                         return render(request, 'kullanicilar/login.html')
                     
-                    # Sadece normal kullanıcıların ana siteye giriş yapmasına izin ver
-                    if kullanici.rol != 'user':
-                        messages.error(request, 'Bu giriş sayfası sadece normal kullanıcılar içindir. Admin paneli için admin girişini kullanın.')
-                        return render(request, 'kullanicilar/login.html')
+                    # Superadmin veya instructor için admin girişini kullan
+                    if kullanici.rol in ['superadmin', 'instructor']:
+                        messages.info(request, 'Admin paneli için admin girişini kullanın.')
+                        return redirect('admin_login')
                     
+                    # Normal kullanıcılar ve kulüp başkanları için ana siteye giriş
                     # Session'a kullanıcı bilgilerini kaydet
                     request.session['user_id'] = kullanici.id
                     request.session['user_username'] = kullanici.kullanici_adi
@@ -113,4 +114,54 @@ def logout_view(request):
     
     messages.success(request, 'Başarıyla çıkış yapıldı.')
     return redirect('kullanicilar:login')
+
+
+def profile_view(request):
+    """User profile page showing user information"""
+    # Check if user is logged in
+    if not request.session.get('is_authenticated'):
+        messages.error(request, 'Bu sayfayı görüntülemek için giriş yapmalısınız.')
+        return redirect('kullanicilar:login')
+    
+    user_id = request.session.get('user_id')
+    
+    try:
+        kullanici = Kullanici.objects.get(id=user_id)
+        
+        if request.method == 'POST':
+            # Get form data
+            new_username = request.POST.get('kullanici_adi', '').strip()
+            new_isim = request.POST.get('isim', '').strip()
+            new_bolum = request.POST.get('bolum', '').strip()
+            
+            # Validate username
+            if new_username and new_username != kullanici.kullanici_adi:
+                # Check if username is already taken
+                if Kullanici.objects.filter(kullanici_adi=new_username).exclude(id=user_id).exists():
+                    messages.error(request, 'Bu kullanıcı adı zaten kullanılıyor.')
+                    return redirect('kullanicilar:profile')
+                kullanici.kullanici_adi = new_username
+                # Update session
+                request.session['user_username'] = new_username
+            
+            # Update other fields
+            if new_isim:
+                kullanici.isim = new_isim
+                request.session['user_isim'] = new_isim
+            
+            if new_bolum:
+                kullanici.bolum = new_bolum
+            
+            kullanici.save()
+            messages.success(request, 'Profil bilgileriniz başarıyla güncellendi!')
+            return redirect('kullanicilar:profile')
+        
+        context = {
+            'kullanici': kullanici,
+        }
+        return render(request, 'kullanicilar/profile.html', context)
+        
+    except Kullanici.DoesNotExist:
+        messages.error(request, 'Kullanıcı bulunamadı.')
+        return redirect('kullanicilar:login')
         
