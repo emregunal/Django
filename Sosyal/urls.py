@@ -6,5 +6,5 @@ urlpatterns = [
     path('etkinlikler/', views.etkinlikler, name='etkinlikler'),
     path('kulupler/', views.kulupler, name='kulupler'),
     path('duyurular/', views.duyurular, name='duyurular'),
-    path('etkinlik/<int:etkinlik_id>/katil/', views.etkinlik_katil, name='etkinlik-katil'),
+    path('etkinlik/<str:etkinlik_id>/katil/', views.etkinlik_katil, name='etkinlik-katil'),
 ]

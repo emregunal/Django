@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yeni Etkinlik Ekle - Admin Panel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        .admin-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(180deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            padding: 30px 0;
+            position: fixed;
+            height: 100vh;
+        }
+
+        .sidebar-header {
+            padding: 0 20px 30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 30px;
+        }
+
+        .sidebar-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .sidebar-subtitle {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 5px;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .main-content {
+            margin-left: 250px;
+            flex: 1;
+            padding: 30px;
+            max-width: 800px;
+        }
+
+        .form-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .form-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #e74c3c;
+            box-shadow: 0 0 0 4px rgba(231, 76, 60, 0.1);
+        }
+
+        select.form-control {
+            cursor: pointer;
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #e74c3c;
+            color: white;
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            background: #d43f2f;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="admin-layout">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">🎓 Admin Panel</div>
+                <div class="sidebar-subtitle">{{ admin_username }}</div>
+            </div>
+            <ul class="sidebar-menu">
+                {% if admin_role == 'superadmin' %}
+                <li><a href="{% url 'admin_dashboard' %}">📊 Dashboard</a></li>
+                <li><a href="{% url 'admin_appointments' %}">📋 Randevular</a></li>
+                {% endif %}
+                <li><a href="{% url 'admin_events' %}" class="active">🎉 Etkinlikler</a></li>
+                <li><a href="{% url 'admin_logout' %}">🚪 Çıkış</a></li>
+            </ul>
+        </div>
+
+        <div class="main-content">
+            <div class="form-card">
+                <h1 class="form-title">Yeni Etkinlik Ekle</h1>
+                <form method="POST">
+                    {% csrf_token %}
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <!-- Sol Kolon -->
+                        <div>
+                            <div class="form-group">
+                                <label class="form-label" for="baslik">Etkinlik Adı *</label>
+                                <input type="text" id="baslik" name="baslik" class="form-control"
+                                    placeholder="Örn: Bahar Şenliği" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="kategori">Kategori *</label>
+                                <select id="kategori" name="kategori" class="form-control" required>
+                                    <option value="">Seçiniz...</option>
+                                    <option value="konser">🎵 Konser</option>
+                                    <option value="konferans">🎤 Konferans</option>
+                                    <option value="spor">⚽ Spor</option>
+                                    <option value="sosyal">🎉 Sosyal</option>
+                                    <option value="akademik">📚 Akademik</option>
+                                    <option value="tiyatro">🎭 Tiyatro</option>
+                                    <option value="sinema">🎬 Sinema</option>
+                                    <option value="gezi">🚌 Gezi</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="konum">Yer / Kampüs *</label>
+                                <select id="konum" name="konum" class="form-control" required>
+                                    <option value="">Seçiniz...</option>
+                                    <optgroup label="Dudullu Kampüsü">
+                                        <option value="Dudullu - Konferans Salonu">Dudullu - Konferans Salonu</option>
+                                        <option value="Dudullu - Amfi 1">Dudullu - Amfi 1</option>
+                                        <option value="Dudullu - Amfi 2">Dudullu - Amfi 2</option>
+                                        <option value="Dudullu - Bahçe">Dudullu - Bahçe</option>
+                                        <option value="Dudullu - Spor Salonu">Dudullu - Spor Salonu</option>
+                                    </optgroup>
+                                    <optgroup label="Çengelköy Kampüsü">
+                                        <option value="Çengelköy - Ana Salon">Çengelköy - Ana Salon</option>
+                                        <option value="Çengelköy - Toplantı Odası">Çengelköy - Toplantı Odası</option>
+                                        <option value="Çengelköy - Teras">Çengelköy - Teras</option>
+                                    </optgroup>
+                                    <option value="online">💻 Online / Zoom</option>
+                                    <option value="disari">📍 Kampüs Dışı</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group" id="ozel_konum_group" style="display: none;">
+                                <label class="form-label" for="ozel_konum">Adres Detayı</label>
+                                <input type="text" id="ozel_konum" name="ozel_konum" class="form-control"
+                                    placeholder="Tam adres giriniz...">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="kontenjan">Kontenjan</label>
+                                <input type="number" id="kontenjan" name="kontenjan" class="form-control" min="1"
+                                    placeholder="Örn: 100" required>
+                            </div>
+                        </div>
+
+                        <!-- Sağ Kolon -->
+                        <div>
+                            <div class="form-group">
+                                <label class="form-label" for="tarih">Tarih *</label>
+                                <input type="date" id="tarih" name="tarih" class="form-control" required>
+                            </div>
+
+                            <div style="display: flex; gap: 15px;">
+                                <div class="form-group" style="flex: 1;">
+                                    <label class="form-label" for="baslangic_saati">Başlangıç *</label>
+                                    <input type="time" id="baslangic_saati" name="baslangic_saati" class="form-control"
+                                        required>
+                                </div>
+                                <div class="form-group" style="flex: 1;">
+                                    <label class="form-label" for="bitis_saati">Bitiş *</label>
+                                    <input type="time" id="bitis_saati" name="bitis_saati" class="form-control"
+                                        required>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="ucret">Ücret Durumu *</label>
+                                <select id="ucret" name="ucret" class="form-control" required>
+                                    <option value="free">Ücretsiz</option>
+                                    <option value="paid">Ücretli</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group" id="ucret_tutari_group" style="display: none;">
+                                <label class="form-label" for="ucret_tutari">Bilet Fiyatı (TL)</label>
+                                <input type="number" id="ucret_tutari" name="ucret_tutari" class="form-control" min="0"
+                                    step="0.01" placeholder="0.00">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="aciklama">Etkinlik Açıklaması</label>
+                                <textarea id="aciklama" name="aciklama" class="form-control" style="height: 108px;"
+                                    placeholder="Detaylı bilgi..." required></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions" style="margin-top: 20px;">
+                        <button type="submit" class="btn btn-primary" style="padding: 15px;">✨ Etkinliği
+                            Oluştur</button>
+                        <a href="{% url 'admin_events' %}" class="btn btn-secondary" style="flex: 0 0 auto;">İptal</a>
+                    </div>
+                </form>
+
+                <script>
+                    // Ücret kontrolü
+                    document.getElementById('ucret').addEventListener('change', function () {
+                        const group = document.getElementById('ucret_tutari_group');
+                        const input = document.getElementById('ucret_tutari');
+                        if (this.value === 'paid') {
+                            group.style.display = 'block';
+                            input.required = true;
+                            input.focus();
+                        } else {
+                            group.style.display = 'none';
+                            input.required = false;
+                            input.value = '';
+                        }
+                    });
+
+                    // Tarih ve Saat Validasyonu
+                    const tarihInput = document.getElementById('tarih');
+                    const baslangicInput = document.getElementById('baslangic_saati');
+                    const bitisInput = document.getElementById('bitis_saati');
+
+                    function updateTimeConstraints() {
+                        const now = new Date();
+                        const todayStr = now.toISOString().split('T')[0];
+                        // Türkiye saati ile uyumlu olması için offset hesabı yapılabilir ama 
+                        // basitlik adına yerel saati formatlıyoruz
+                        const hours = String(now.getHours()).padStart(2, '0');
+                        const minutes = String(now.getMinutes()).padStart(2, '0');
+                        const currentTimeStr = `${hours}:${minutes}`;
+
+                        // 1. Tarih bugünden önce olamaz
+                        tarihInput.min = todayStr;
+
+                        // 2. Bugün seçiliyse, saat şu andan önce olamaz
+                        if (tarihInput.value === todayStr) {
+                            baslangicInput.min = currentTimeStr;
+
+                            // Seçili saat geçmişte kaldıysa temizle veya güncelle
+                            if (baslangicInput.value && baslangicInput.value < currentTimeStr) {
+                                baslangicInput.value = currentTimeStr;
+                            }
+                        } else {
+                            baslangicInput.removeAttribute('min');
+                        }
+
+                        // 3. Bitiş saati, başlangıç saatinden önce olamaz
+                        if (baslangicInput.value) {
+                            bitisInput.min = baslangicInput.value;
+
+                            if (bitisInput.value && bitisInput.value < baslangicInput.value) {
+                                bitisInput.value = baslangicInput.value;
+                            }
+                        }
+                    }
+
+                    // Event listener'lar
+                    tarihInput.addEventListener('change', updateTimeConstraints);
+                    tarihInput.addEventListener('input', updateTimeConstraints);
+
+                    baslangicInput.addEventListener('input', function () {
+                        const now = new Date();
+                        const todayStr = now.toISOString().split('T')[0];
+                        const hours = String(now.getHours()).padStart(2, '0');
+                        const minutes = String(now.getMinutes()).padStart(2, '0');
+                        const currentTimeStr = `${hours}:${minutes}`;
+
+                        // Eğer bugün seçiliyse ve geçmiş saat girilmeye çalışılıyorsa
+                        if (tarihInput.value === todayStr && this.value < currentTimeStr) {
+                            // Değeri sıfırla veya en yakın geçerli saate çek
+                            // this.value = currentTimeStr; // Otomatik düzeltme yerine
+                            this.setCustomValidity('Geçmiş bir saat seçemezsiniz!');
+                            this.reportValidity();
+                            // Görsel olarak hata durumu (CSS ile desteklenebilir)
+                            this.style.borderColor = '#e74c3c';
+                            this.style.backgroundColor = '#fff5f5';
+                        } else {
+                            this.setCustomValidity('');
+                            this.style.borderColor = '#e0e0e0';
+                            this.style.backgroundColor = 'white';
+                        }
+                        updateTimeConstraints();
+                    });
+
+                    bitisInput.addEventListener('input', function () {
+                        if (baslangicInput.value && this.value <= baslangicInput.value) {
+                            this.setCustomValidity('Bitiş saati, başlangıç saatinden sonra olmalıdır.');
+                            this.reportValidity();
+                            this.style.borderColor = '#e74c3c';
+                            this.style.backgroundColor = '#fff5f5';
+                        } else {
+                            this.setCustomValidity('');
+                            this.style.borderColor = '#e0e0e0';
+                            this.style.backgroundColor = 'white';
+                        }
+                    });
+
+                    // Sayfa yüklendiğinde çalıştır
+                    updateTimeConstraints();
+
+                    // Her dakika kontrolü güncelle (sayfa açıkken zaman geçiyor)
+                    setInterval(updateTimeConstraints, 60000);
+
+                    // Konum kontrolü
+                    document.getElementById('konum').addEventListener('change', function () {
+                        const group = document.getElementById('ozel_konum_group');
+                        const input = document.getElementById('ozel_konum');
+
+                        // Eğer dışarı veya online seçilirse detay kutusunu göster
+                        if (this.value === 'disari' || this.value === 'online') {
+                            group.style.display = 'block';
+                            input.required = true;
+                            input.placeholder = this.value === 'online' ? 'Zoom/Meet Linki' : 'Tam adres giriniz...';
+                            input.focus();
+                        } else {
+                            group.style.display = 'none';
+                            input.required = false;
+                        }
+                    });
+                </script>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

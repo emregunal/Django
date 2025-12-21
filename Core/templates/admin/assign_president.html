@@ -1,0 +1,553 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Kulüp Başkanı Ata - Admin Panel{% endblock %}
+
+{% block nav_clubs %}active{% endblock %}
+{% block page_title %}Kulüp Başkanı Ata{% endblock %}
+
+{% block extra_styles %}
+    <style>
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .alert-banner {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%);
+            border: 1px solid #ffc107;
+            border-left: 4px solid #ffc107;
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #856404;
+        }
+
+        .alert-icon {
+            font-size: 24px;
+        }
+
+        .club-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .club-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border: 1px solid #f0f0f0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .club-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        .club-card.needs-president {
+            border-left: 4px solid #ffc107;
+        }
+
+        .club-card.has-president {
+            border-left: 4px solid #28a745;
+        }
+
+        .club-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .club-category {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #7f8c8d;
+            background: #f8f9fa;
+            padding: 4px 10px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+
+        .president-info {
+            background: #f8f9fa;
+            padding: 12px 15px;
+            border-radius: 8px;
+        }
+
+        .president-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #95a5a6;
+            margin-bottom: 5px;
+        }
+
+        .president-name {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .no-president-badge {
+            background: #fff3cd;
+            color: #856404;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .click-hint {
+            font-size: 12px;
+            color: #95a5a6;
+            margin-top: 15px;
+        }
+
+        .divider {
+            height: 1px;
+            background: linear-gradient(to right, transparent, #e0e0e0, transparent);
+            margin: 40px 0;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #95a5a6;
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        /* ===== Hero Animation Modal ===== */
+        .detail-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 250px;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .detail-modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .detail-card-clone {
+            position: absolute;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            z-index: 1000;
+            overflow: hidden;
+            transition: top 0.4s cubic-bezier(0.19, 1, 0.22, 1),
+                        left 0.4s cubic-bezier(0.19, 1, 0.22, 1),
+                        width 0.4s cubic-bezier(0.19, 1, 0.22, 1),
+                        height 0.4s cubic-bezier(0.19, 1, 0.22, 1),
+                        border-radius 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-card-clone.fullscreen {
+            border-radius: 0;
+        }
+
+        .close-btn {
+            background: white;
+            color: #e74c3c;
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 1002;
+            line-height: 1;
+        }
+
+        .close-btn:hover {
+            transform: scale(1.1) rotate(90deg);
+        }
+
+        .detail-content {
+            padding: 0;
+            opacity: 0;
+            transition: opacity 0.3s 0.2s;
+            overflow-y: auto;
+            height: 100%;
+        }
+
+        .detail-card-clone.active .detail-content {
+            opacity: 1;
+        }
+
+        .detail-header-section {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            padding: 40px;
+            color: white;
+            position: relative;
+        }
+
+        .detail-title-large {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .detail-category-large {
+            background: rgba(255,255,255,0.2);
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            display: inline-block;
+        }
+
+        .form-container {
+            padding: 40px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .form-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s;
+            box-sizing: border-box;
+        }
+
+        .form-control:focus {
+            border-color: #e74c3c;
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(231, 76, 60, 0.1);
+        }
+
+        .form-hint {
+            font-size: 12px;
+            color: #95a5a6;
+            margin-top: 5px;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            padding: 14px 28px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.3);
+        }
+
+        .current-president-box {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+        }
+
+        .current-president-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #155724;
+            margin-bottom: 5px;
+        }
+
+        .current-president-name {
+            font-weight: 600;
+            color: #155724;
+            font-size: 16px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <!-- Modal Overlay -->
+    <div id="modalOverlay" class="detail-modal-overlay"></div>
+    
+    <!-- Detail Modal Container -->
+    <div id="detailCard" class="detail-card-clone" style="display: none;">
+        <div class="close-btn" onclick="closeDetail()">✕</div>
+        <div class="detail-content" id="detailContent">
+            <!-- Content injected by JS -->
+        </div>
+    </div>
+
+    <!-- Clubs Without President Section -->
+    {% if clubs_without_president %}
+        <div class="alert-banner">
+            <span class="alert-icon">⚠️</span>
+            <div>
+                <strong>{{ clubs_without_president|length }} kulübün başkanı atanmamış!</strong>
+                <div style="font-size: 13px; margin-top: 3px;">Kartlara tıklayarak başkan atayabilirsiniz.</div>
+            </div>
+        </div>
+
+        <div class="section-title">
+            <span>👑</span> Başkan Bekleyen Kulüpler
+        </div>
+
+        <div class="club-grid">
+            {% for club in clubs_without_president %}
+            <div class="club-card needs-president" onclick="expandCard(this)"
+                 data-id="{{ club.id }}"
+                 data-ad="{{ club.ad }}"
+                 data-kategori="{{ club.kategori }}"
+                 data-has-president="false"
+                 data-baskan-isim=""
+                 data-baskan-username="">
+                <div class="club-name">{{ club.ad }}</div>
+                <div class="club-category">{{ club.kategori }}</div>
+                <div class="no-president-badge">⚠️ Başkan Atanmamış</div>
+                <div class="click-hint">📌 Atamak için tıklayın</div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state" style="margin-bottom: 30px;">
+            <div class="empty-icon">✅</div>
+            <p>Tüm kulüplerin başkanları atanmış durumda.</p>
+        </div>
+    {% endif %}
+
+    <!-- Divider -->
+    {% if clubs_without_president and clubs_with_president %}
+        <div class="divider"></div>
+    {% endif %}
+
+    <!-- Clubs With President Section -->
+    {% if clubs_with_president %}
+        <div class="section-title">
+            <span>✅</span> Başkanı Atanmış Kulüpler
+        </div>
+
+        <div class="club-grid">
+            {% for club in clubs_with_president %}
+            <div class="club-card has-president" onclick="expandCard(this)"
+                 data-id="{{ club.id }}"
+                 data-ad="{{ club.ad }}"
+                 data-kategori="{{ club.kategori }}"
+                 data-has-president="true"
+                 data-baskan-isim="{{ club.baskan_isim|default:'' }}"
+                 data-baskan-username="{{ club.baskan_username|default:'' }}">
+                <div class="club-name">{{ club.ad }}</div>
+                <div class="club-category">{{ club.kategori }}</div>
+                
+                <div class="president-info">
+                    <div class="president-label">Mevcut Başkan</div>
+                    <div class="president-name">👤 {{ club.baskan_isim|default:club.baskan_username }}</div>
+                </div>
+                <div class="click-hint">📝 Değiştirmek için tıklayın</div>
+            </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- No Clubs At All -->
+    {% if not clubs_without_president and not clubs_with_president %}
+        <div class="empty-state">
+            <div class="empty-icon">📭</div>
+            <p>Henüz onaylanmış kulüp bulunmuyor.</p>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    let activeCard = null;
+    let originalRect = null;
+    const overlay = document.getElementById('modalOverlay');
+    const detailCard = document.getElementById('detailCard');
+    const content = document.getElementById('detailContent');
+    const mainContent = document.querySelector('.main-content');
+
+    function expandCard(card) {
+        activeCard = card;
+        originalRect = card.getBoundingClientRect();
+        
+        const data = card.dataset;
+        const hasPresident = data.hasPresident === 'true';
+
+        // Build form content
+        let currentPresidentBox = '';
+        if (hasPresident) {
+            currentPresidentBox = `
+                <div class="current-president-box">
+                    <div class="current-president-label">Mevcut Başkan</div>
+                    <div class="current-president-name">👤 ${data.baskanIsim || data.baskanUsername}</div>
+                </div>
+            `;
+        }
+
+        content.innerHTML = `
+            <div class="detail-header-section">
+                <div class="detail-title-large">${data.ad}</div>
+                <div class="detail-category-large">${data.kategori}</div>
+            </div>
+
+            <div class="form-container">
+                <div class="form-title">
+                    ${hasPresident ? '🔄 Başkanı Değiştir' : '👑 Yeni Başkan Ata'}
+                </div>
+
+                ${currentPresidentBox}
+
+                <form method="POST">
+                    <input type="hidden" name="csrfmiddlewaretoken" value="${getCSRFToken()}">
+                    <input type="hidden" name="club_id" value="${data.id}">
+
+                    <div class="form-group">
+                        <label class="form-label">Ad Soyad *</label>
+                        <input type="text" name="president_name" class="form-control" placeholder="Örn: Ahmet Yılmaz" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Okul Numarası *</label>
+                        <input type="text" name="username" class="form-control" placeholder="Örn: 202012345" required>
+                        <div class="form-hint">Kullanıcı adı olarak da kullanılacaktır.</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Okul E-postası *</label>
+                        <input type="email" name="president_email" class="form-control" placeholder="Örn: 202012345@ogr.dogus.edu.tr" required>
+                    </div>
+
+                    <button type="submit" class="btn-submit">
+                        ${hasPresident ? '🔄 Başkanı Değiştir' : '👑 Başkan Olarak Ata'}
+                    </button>
+                </form>
+            </div>
+        `;
+
+        // Calculate position relative to Main Content
+        const mainRect = mainContent.getBoundingClientRect();
+        const relativeTop = originalRect.top - mainRect.top;
+        const relativeLeft = originalRect.left - mainRect.left;
+
+        // Set Initial Position
+        detailCard.style.display = 'flex';
+        detailCard.style.top = relativeTop + 'px';
+        detailCard.style.left = relativeLeft + 'px';
+        detailCard.style.width = originalRect.width + 'px';
+        detailCard.style.height = originalRect.height + 'px';
+        detailCard.classList.remove('active', 'fullscreen');
+
+        // Trigger Transition
+        overlay.classList.add('active');
+        
+        // Force Reflow
+        void detailCard.offsetWidth;
+
+        // Expand to Fullscreen
+        const finalWidth = mainContent.clientWidth;
+        const finalHeight = mainContent.clientHeight;
+
+        detailCard.style.top = '0px';
+        detailCard.style.left = '0px';
+        detailCard.style.width = finalWidth + 'px';
+        detailCard.style.height = finalHeight + 'px';
+        detailCard.classList.add('fullscreen');
+        
+        document.body.style.overflow = 'hidden';
+        
+        setTimeout(() => {
+            detailCard.classList.add('active'); 
+        }, 300);
+    }
+
+    function closeDetail() {
+        if(!activeCard) return;
+
+        detailCard.classList.remove('active');
+        document.body.style.overflow = '';
+        
+        const mainRect = mainContent.getBoundingClientRect();
+        const currentCardRect = activeCard.getBoundingClientRect();
+        
+        const relativeTop = currentCardRect.top - mainRect.top;
+        const relativeLeft = currentCardRect.left - mainRect.left;
+
+        detailCard.classList.remove('fullscreen');
+        detailCard.style.top = relativeTop + 'px';
+        detailCard.style.left = relativeLeft + 'px';
+        detailCard.style.width = currentCardRect.width + 'px';
+        detailCard.style.height = currentCardRect.height + 'px';
+        
+        overlay.classList.remove('active');
+
+        setTimeout(() => {
+            detailCard.style.display = 'none';
+            activeCard = null;
+        }, 400);
+    }
+
+    function getCSRFToken() {
+        const cookie = document.cookie.split(';').find(c => c.trim().startsWith('csrftoken='));
+        return cookie ? cookie.split('=')[1] : '';
+    }
+
+    overlay.addEventListener('click', closeDetail);
+</script>
+{% endblock %}

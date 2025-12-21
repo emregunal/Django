@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Randevu Tablosu - Öğretim Görevlisi Paneli</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        .admin-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(180deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            padding: 30px 0;
+            position: fixed;
+            height: 100vh;
+        }
+
+        .sidebar-header {
+            padding: 0 20px 30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 30px;
+        }
+
+        .sidebar-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .sidebar-subtitle {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        .sidebar-role {
+            font-size: 11px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 10px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 8px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 5px;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .main-content {
+            margin-left: 250px;
+            flex: 1;
+            padding: 30px;
+        }
+
+        .top-bar {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .page-title {
+            font-size: 24px;
+            color: #333;
+        }
+
+        .filter-bar {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-select {
+            padding: 10px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            background: white;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .instructor-badge {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .instructor-badge:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            padding: 15px 20px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.3s;
+        }
+
+        .data-table th:hover {
+            background: linear-gradient(135deg, #2980b9 0%, #1a5276 100%);
+        }
+
+        .data-table th a {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sort-icon {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+
+        .sort-icon.active {
+            opacity: 1;
+        }
+
+        .data-table td {
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .data-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status-bekliyor {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-onaylandi {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-reddedildi {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn-approve {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-approve:hover {
+            background: #219a52;
+        }
+
+        .btn-reject {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-reject:hover {
+            background: #d43f2f;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 15px;
+        }
+
+        .messages {
+            margin-bottom: 20px;
+        }
+
+        .alert {
+            padding: 12px 20px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        @media (max-width: 1024px) {
+            .data-table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+
+        /* User Menu Dropdown */
+        .user-menu {
+            position: relative;
+        }
+
+        .user-menu-trigger {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 200px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.15);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 100;
+            margin-top: 15px;
+            border: 1px solid #eee;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+
+        .user-dropdown.show {
+            display: flex;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .user-dropdown a {
+            padding: 12px 20px;
+            text-decoration: none;
+            color: #333;
+            transition: all 0.2s;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid #f5f7fa;
+        }
+
+        .user-dropdown a:last-child {
+            border-bottom: none;
+        }
+
+        .user-dropdown a:hover {
+            background: #f8f9fa;
+            color: #3498db;
+            padding-left: 25px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="admin-layout">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">Öğretim Paneli</div>
+                <div class="sidebar-subtitle">{{ admin_username }}</div>
+                <div class="sidebar-role">Öğretim Görevlisi</div>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="{% url 'instructor_appointments' %}">📋 Randevularım</a></li>
+                <li><a href="{% url 'instructor_appointments_table' %}" class="active">📊 Randevu Tablosu</a></li>
+            </ul>
+        </div>
+
+        <div class="main-content">
+            <div class="top-bar">
+                <h1 class="page-title">📊 Randevu Tablosu</h1>
+                <div class="user-menu">
+                    <div class="user-menu-trigger" onclick="toggleUserMenu()">
+                        <span class="instructor-badge">{{ ogretmen_adi }} ▼</span>
+                    </div>
+                    <div class="user-dropdown" id="userDropdown">
+                        <a href="{% url 'instructor_profile' %}">👤 Profilim</a>
+                        <a href="{% url 'admin_logout' %}" style="color: #e74c3c;">🚪 Çıkış Yap</a>
+                    </div>
+                </div>
+            </div>
+
+            {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if appointments %}
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>
+                                <a
+                                    href="?sort=tarih&order={% if sort_by == 'tarih' and order == 'asc' %}desc{% else %}asc{% endif %}&status={{ status_filter }}">
+                                    📅 Tarih
+                                    <span class="sort-icon {% if sort_by == 'tarih' %}active{% endif %}">
+                                        {% if sort_by == 'tarih' %}{% if order == 'asc' %}↑{% else %}↓{% endif %}{% else %}↕{% endif %}
+                                    </span>
+                                </a>
+                            </th>
+                            <th>
+                                <a
+                                    href="?sort=ogrenci&order={% if sort_by == 'ogrenci' and order == 'asc' %}desc{% else %}asc{% endif %}&status={{ status_filter }}">
+                                    👤 Öğrenci
+                                    <span class="sort-icon {% if sort_by == 'ogrenci' %}active{% endif %}">
+                                        {% if sort_by == 'ogrenci' %}{% if order == 'asc' %}↑{% else %}↓{% endif %}{% else %}↕{% endif %}
+                                    </span>
+                                </a>
+                            </th>
+                            <th>🕐 Saat</th>
+                            <th>
+                                <a
+                                    href="?sort=konu&order={% if sort_by == 'konu' and order == 'asc' %}desc{% else %}asc{% endif %}&status={{ status_filter }}">
+                                    📝 Konu
+                                    <span class="sort-icon {% if sort_by == 'konu' %}active{% endif %}">
+                                        {% if sort_by == 'konu' %}{% if order == 'asc' %}↑{% else %}↓{% endif %}{% else %}↕{% endif %}
+                                    </span>
+                                </a>
+                            </th>
+                            <th>
+                                <a
+                                    href="?sort=durum&order={% if sort_by == 'durum' and order == 'asc' %}desc{% else %}asc{% endif %}&status={{ status_filter }}">
+                                    📌 Durum
+                                    <span class="sort-icon {% if sort_by == 'durum' %}active{% endif %}">
+                                        {% if sort_by == 'durum' %}{% if order == 'asc' %}↑{% else %}↓{% endif %}{% else %}↕{% endif %}
+                                    </span>
+                                </a>
+                            </th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for apt in appointments %}
+                        <tr>
+                            <td>{{ apt.tarih }}</td>
+                            <td>
+                                <strong>{{ apt.ogrenci_adi }}</strong>
+                            </td>
+                            <td>{{ apt.baslangic_saati }} - {{ apt.bitis_saati }}</td>
+                            <td>
+                                <div style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
+                                    title="{{ apt.konu }}">
+                                    {{ apt.konu }}
+                                </div>
+                            </td>
+                            <td>
+                                <span class="status-badge status-{{ apt.durum }}">
+                                    {% if apt.durum == 'bekliyor' %}⏱ Bekliyor
+                                    {% elif apt.durum == 'onaylandi' %}✓ Onaylandı
+                                    {% elif apt.durum == 'reddedildi' %}✗ Reddedildi
+                                    {% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                {% if apt.durum == 'bekliyor' %}
+                                <div class="action-btns">
+                                    <form method="POST" action="{% url 'instructor_approve_appointment' apt.id %}"
+                                        style="display: inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn-sm btn-approve">✓ Onayla</button>
+                                    </form>
+                                    <form method="POST" action="{% url 'instructor_reject_appointment' apt.id %}"
+                                        style="display: inline;"
+                                        onsubmit="return confirm('Bu randevuyu reddetmek istediğinize emin misiniz?')">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn-sm btn-reject">✗ Reddet</button>
+                                    </form>
+                                </div>
+                                {% else %}
+                                <span style="color: #999; font-size: 13px;">—</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="table-container">
+                <div class="empty-state">
+                    <div class="empty-state-icon">📅</div>
+                    <h3 style="font-size: 20px; color: #333; margin-bottom: 8px;">Randevu Bulunamadı</h3>
+                    <p>Bu filtreye uygun randevu bulunmuyor.</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        function applyFilter(status) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('status', status);
+            window.location.href = url.toString();
+        }
+
+        function toggleUserMenu() {
+            const menu = document.getElementById('userDropdown');
+            menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+            if (menu.style.display === 'flex') {
+                setTimeout(() => {
+                    menu.classList.add('show');
+                }, 10);
+            } else {
+                menu.classList.remove('show');
+            }
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function (event) {
+            const menu = document.getElementById('userDropdown');
+            const trigger = document.querySelector('.user-menu-trigger');
+            if (menu && trigger && !menu.contains(event.target) && !trigger.contains(event.target)) {
+                menu.classList.remove('show');
+                setTimeout(() => {
+                    menu.style.display = 'none';
+                }, 300);
+            }
+        });
+    </script>
+</body>
+
+</html>

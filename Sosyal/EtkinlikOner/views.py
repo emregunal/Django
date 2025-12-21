@@ -1,10 +1,10 @@
 from django.shortcuts import render, redirect
-from django.http.response import HttpResponse
-from django.contrib.auth.decorators import login_required
-from Sosyal.models import Etkinlik
+from Kullanıcılar.decorators import kullanici_login_required
 from django.contrib import messages
+from Core.mongodb_utils import get_db
+from datetime import datetime
 
-@login_required(login_url='/Kullanıcılar/login/')
+@kullanici_login_required
 def etkinlikOner(request):
     if request.method == 'POST':
         baslik = request.POST.get('baslik')
@@ -16,19 +16,23 @@ def etkinlikOner(request):
         aciklama = request.POST.get('aciklama')
         
         try:
-            Etkinlik.objects.create(
-                baslik=baslik,
-                kategori=kategori,
-                tarih=tarih,
-                baslangic_saati=baslangic_saati,
-                bitis_saati=bitis_saati,
-                konum=konum,
-                aciklama=aciklama,
-                olusturan=request.user
-            )
+            db = get_db()
+            db.etkinlikler.insert_one({
+                'baslik': baslik,
+                'kategori': kategori,
+                'tarih': tarih,
+                'baslangic_saati': baslangic_saati,
+                'bitis_saati': bitis_saati,
+                'konum': konum,
+                'aciklama': aciklama,
+                'olusturan_id': request.session.get('user_id'),
+                'olusturan_username': request.session.get('user_username'),
+                'katilimci_ids': [],
+                'olusturma_tarihi': datetime.now()
+            })
             messages.success(request, 'Etkinlik öneriniz başarıyla gönderildi!')
             return redirect('etkinlikler')
         except Exception as e:
-            messages.error(request, 'Etkinlik oluşturulurken bir hata oluştu.')
+            messages.error(request, f'Etkinlik oluşturulurken bir hata oluştu: {str(e)}')
     
-    return render(request, "etkinlikOner.html") 
+    return render(request, "etkinlikOner.html")

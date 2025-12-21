@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Randevularım - Öğretim Görevlisi Paneli</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        .admin-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(180deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            padding: 30px 0;
+            position: fixed;
+            height: 100vh;
+        }
+
+        .sidebar-header {
+            padding: 0 20px 30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 30px;
+        }
+
+        .sidebar-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .sidebar-subtitle {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        .sidebar-role {
+            font-size: 11px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 10px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 8px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 5px;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .main-content {
+            margin-left: 250px;
+            flex: 1;
+            padding: 30px;
+        }
+
+        .top-bar {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .page-title {
+            font-size: 24px;
+            color: #333;
+        }
+
+        .instructor-badge {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .instructor-badge:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .stat-card.pending .stat-number {
+            color: #f39c12;
+        }
+
+        .stat-card.approved .stat-number {
+            color: #27ae60;
+        }
+
+        .stat-card.rejected .stat-number {
+            color: #e74c3c;
+        }
+
+        .stat-card.cancelled .stat-number {
+            color: #95a5a6;
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .filter-tab {
+            padding: 10px 20px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            text-decoration: none;
+            color: #666;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .filter-tab.active {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+
+        .filter-tab:hover:not(.active) {
+            border-color: #3498db;
+            color: #3498db;
+        }
+
+        .appointments-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 20px;
+        }
+
+        .appointment-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid #f39c12;
+            transition: all 0.3s;
+        }
+
+        .appointment-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .appointment-card.approved {
+            border-left-color: #27ae60;
+        }
+
+        .appointment-card.rejected {
+            border-left-color: #e74c3c;
+        }
+
+        .appointment-card.cancelled {
+            border-left-color: #95a5a6;
+        }
+
+        .appointment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+
+        .student-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .student-id {
+            font-size: 13px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-bekliyor {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-onaylandi {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-reddedildi {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-iptal {
+            background: #e9ecef;
+            color: #6c757d;
+        }
+
+        .appointment-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .info-item strong {
+            color: #333;
+        }
+
+        .appointment-subject {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .appointment-subject strong {
+            color: #333;
+        }
+
+        .appointment-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+            flex: 1;
+            text-align: center;
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #219a52;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #d43f2f;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+            background: white;
+            border-radius: 15px;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 15px;
+        }
+
+        .messages {
+            margin-bottom: 20px;
+        }
+
+        .alert {
+            padding: 12px 20px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .appointments-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .appointment-info {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .user-menu {
+            position: relative;
+        }
+
+        .user-menu-trigger {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 200px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.15);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 100;
+            margin-top: 15px;
+            border: 1px solid #eee;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+
+        .user-dropdown.show {
+            display: flex;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .user-dropdown a {
+            padding: 12px 20px;
+            text-decoration: none;
+            color: #333;
+            transition: all 0.2s;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid #f5f7fa;
+        }
+
+        .user-dropdown a:last-child {
+            border-bottom: none;
+        }
+
+        .user-dropdown a:hover {
+            background: #f8f9fa;
+            color: #3498db;
+            padding-left: 25px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="admin-layout">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">Öğretim Paneli</div>
+                <div class="sidebar-subtitle">{{ admin_username }}</div>
+                <div class="sidebar-role">Öğretim Görevlisi</div>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="{% url 'instructor_appointments' %}" class="active">📋 Randevularım</a></li>
+                <li><a href="{% url 'instructor_appointments_table' %}">📊 Randevu Tablosu</a></li>
+            </ul>
+        </div>
+
+        <div class="main-content">
+            <div class="top-bar">
+                <h1 class="page-title">Randevu Yönetimi</h1>
+                <div class="user-menu">
+                    <div class="user-menu-trigger" onclick="toggleUserMenu()">
+                        <span class="instructor-badge">{{ ogretmen_adi }} ▼</span>
+                    </div>
+                    <div class="user-dropdown" id="userDropdown">
+                        <a href="{% url 'instructor_profile' %}">👤 Profilim</a>
+                        <a href="{% url 'admin_logout' %}" style="color: #e74c3c;">🚪 Çıkış Yap</a>
+                    </div>
+                </div>
+            </div>
+
+            {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">{{ stats.total }}</div>
+                    <div class="stat-label">Toplam Randevu</div>
+                </div>
+                <div class="stat-card pending">
+                    <div class="stat-number">{{ stats.pending }}</div>
+                    <div class="stat-label">Bekleyen</div>
+                </div>
+                <div class="stat-card approved">
+                    <div class="stat-number">{{ stats.approved }}</div>
+                    <div class="stat-label">Onaylanan</div>
+                </div>
+                <div class="stat-card rejected">
+                    <div class="stat-number">{{ stats.rejected }}</div>
+                    <div class="stat-label">Reddedilen</div>
+                </div>
+                <div class="stat-card cancelled">
+                    <div class="stat-number">{{ stats.cancelled }}</div>
+                    <div class="stat-label">İptal Edilen</div>
+                </div>
+            </div>
+
+            <div class="filter-tabs">
+                <a href="?status=bekliyor" class="filter-tab {% if status_filter == 'bekliyor' %}active{% endif %}">⏱
+                    Bekleyen</a>
+                <a href="?status=all" class="filter-tab {% if status_filter == 'all' %}active{% endif %}">📋 Tümü</a>
+                <a href="?status=onaylandi" class="filter-tab {% if status_filter == 'onaylandi' %}active{% endif %}">✓
+                    Onaylanan</a>
+                <a href="?status=reddedildi"
+                    class="filter-tab {% if status_filter == 'reddedildi' %}active{% endif %}">✗ Reddedilen</a>
+                <a href="?status=iptal" class="filter-tab {% if status_filter == 'iptal' %}active{% endif %}">🚫 İptal
+                    Edilen</a>
+            </div>
+
+            {% if appointments %}
+            <div class="appointments-grid">
+                {% for apt in appointments %}
+                <div
+                    class="appointment-card {% if apt.durum == 'onaylandi' %}approved{% elif apt.durum == 'reddedildi' %}rejected{% elif apt.durum == 'iptal' %}cancelled{% endif %}">
+                    <div class="appointment-header">
+                        <div>
+                            <div class="student-name">👤 {{ apt.ogrenci_adi }}</div>
+                            <div class="student-id">ID: {{ apt.ogrenci_id }}</div>
+                        </div>
+                        <span class="status-badge status-{{ apt.durum }}">
+                            {% if apt.durum == 'bekliyor' %}⏱ Bekliyor{% elif apt.durum == 'onaylandi' %}✓ Onaylandı{%
+                            elif apt.durum == 'reddedildi' %}✗ Reddedildi{% elif apt.durum == 'iptal' %}🚫 İptal
+                            Edildi{% endif %}
+                        </span>
+                    </div>
+
+                    <div class="appointment-info">
+                        <div class="info-item">📅 <strong>Tarih:</strong> {{ apt.tarih }}</div>
+                        <div class="info-item">🕐 <strong>Saat:</strong> {{ apt.baslangic_saati }} - {{ apt.bitis_saati }}</div>
+                    </div>
+                    <div class="appointment-subject">
+                        <strong>📝 Konu:</strong> {{ apt.konu }}
+                        {% if apt.aciklama %}
+                        <div style="margin-top: 8px; font-size: 13px; color: #666;">{{ apt.aciklama }}</div>
+                        {% endif %}
+                    </div>
+
+                    {% if apt.durum == 'bekliyor' %}
+                    <div class="appointment-actions">
+                        <form method="POST" action="{% url 'instructor_approve_appointment' apt.id %}" style="flex: 1;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success" style="width: 100%;">✓ Onayla</button>
+                        </form>
+                        <form method="POST" action="{% url 'instructor_reject_appointment' apt.id %}" style="flex: 1;"
+                            onsubmit="return confirm('Bu randevuyu reddetmek istediğinize emin misiniz?')">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger" style="width: 100%;">✗ Reddet</button>
+                        </form>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">📅</div>
+                <h3 style="font-size: 20px; color: #333; margin-bottom: 8px;">Randevu Bulunamadı</h3>
+                <p>Bu filtreye uygun randevu bulunmuyor.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        function toggleUserMenu() {
+            const menu = document.getElementById('userDropdown');
+            menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+            if (menu.style.display === 'flex') {
+                setTimeout(() => { menu.classList.add('show'); }, 10);
+            } else {
+                menu.classList.remove('show');
+            }
+        }
+
+        document.addEventListener('click', function (event) {
+            const menu = document.getElementById('userDropdown');
+            const trigger = document.querySelector('.user-menu-trigger');
+            if (menu && trigger && !menu.contains(event.target) && !trigger.contains(event.target)) {
+                menu.classList.remove('show');
+                setTimeout(() => { menu.style.display = 'none'; }, 300);
+            }
+        });
+    </script>
+</body>
+
+</html>

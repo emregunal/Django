@@ -1,0 +1,588 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Kulüp Yönetimi - Admin Panel{% endblock %}
+
+{% block nav_clubs %}active{% endblock %}
+{% block page_title %}Kulüp Yönetimi{% endblock %}
+
+{% block extra_styles %}
+    <style>
+        /* Filter Tabs */
+        .filter-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .filter-tab {
+            padding: 10px 20px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            text-decoration: none;
+            color: #666;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .filter-tab.active {
+            background: #e74c3c;
+            color: white;
+            border-color: #e74c3c;
+        }
+
+        /* Club Card */
+        .club-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+            transition: all 0.3s ease;
+            border: 1px solid #f0f0f0;
+            border-left: 4px solid #e74c3c; /* Red accent */
+            cursor: pointer;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            overflow: hidden;
+        }
+        
+        .club-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(231, 76, 60, 0.15); /* Reddish shadow */
+        }
+
+        .club-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .club-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 5px;
+            line-height: 1.3;
+        }
+
+        .club-category {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #7f8c8d;
+            font-weight: 600;
+            background: #f8f9fa;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .status-badge {
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-approved { background: #d4edda; color: #155724; }
+        .status-rejected { background: #f8d7da; color: #721c24; }
+
+        .club-desc {
+            font-size: 14px;
+            color: #636e72;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .club-footer {
+            margin-top: auto;
+            border-top: 1px solid #f5f5f5;
+            padding-top: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: #95a5a6;
+        }
+
+        .footer-info {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .footer-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .action-overlay {
+            margin-top: 10px;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .btn-approve { background: #d4edda; color: #155724; }
+        .btn-approve:hover { background: #c3e6cb; }
+
+        .btn-reject { background: #f8d7da; color: #721c24; }
+        .btn-reject:hover { background: #f5c6cb; }
+
+        .btn-delete { background: #f1f2f6; color: #747d8c; }
+        .btn-delete:hover { background: #dfe4ea; color: #2f3542; }
+
+        .detail-card-clone.fullscreen {
+            border-radius: 0;
+        }
+
+        /* Detail Modal Overlay */
+        .detail-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 250px; /* Sidebar width */
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .detail-modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Detail Card Clone - Hero Animation Container */
+        .detail-card-clone {
+            position: absolute;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            z-index: 1000;
+            overflow: hidden;
+            /* CRITICAL: Transition for hero animation */
+            transition: top 0.4s cubic-bezier(0.19, 1, 0.22, 1),
+                        left 0.4s cubic-bezier(0.19, 1, 0.22, 1),
+                        width 0.4s cubic-bezier(0.19, 1, 0.22, 1),
+                        height 0.4s cubic-bezier(0.19, 1, 0.22, 1),
+                        border-radius 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Themed Detail Modal Styles */
+        .detail-card-clone {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f8f9fa; /* Light grey background for contrast */
+        }
+
+        .detail-header-section {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            padding: 40px;
+            color: white;
+            position: relative;
+        }
+
+        .detail-title-large {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .detail-category-large {
+            background: rgba(255,255,255,0.2);
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            display: inline-block;
+            backdrop-filter: blur(5px);
+        }
+        
+        .close-btn {
+            background: white;
+            color: #e74c3c;
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 1002;
+            border: 2px solid rgba(255,255,255,0.2);
+            line-height: 1; /* Fix vertical alignment */
+            padding-bottom: 2px; /* Visual correction */
+        }
+        
+        .close-btn:hover {
+            transform: scale(1.1) rotate(90deg);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            background: #fff;
+            color: #c0392b;
+        }
+
+        .detail-content {
+            padding: 0; /* Removed padding to allow full-width header */
+            opacity: 0;
+            transition: opacity 0.3s 0.2s;
+            overflow-y: auto;
+            height: 100%;
+        }
+
+        .detail-card-clone.active .detail-content {
+            opacity: 1;
+        }
+
+        .detail-grid {
+            padding: 30px; /* Added padding here for content */
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 25px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Ensure close button is always on top */
+        .close-btn {
+            z-index: 1002; 
+        }
+
+        .detail-box {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+            border: 1px solid #eee;
+        }
+
+        .detail-section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 2px solid #f0f2f5;
+            padding-bottom: 10px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #f9f9f9;
+            padding-bottom: 10px;
+        }
+
+        .info-label {
+            color: #7f8c8d;
+            font-weight: 500;
+        }
+
+        .info-value {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <!-- Modal Container (Placeholder for Animation) -->
+    <div id="modalOverlay" class="detail-modal-overlay"></div>
+    <div id="detailCard" class="detail-card-clone" style="display: none;">
+        <div class="close-btn" onclick="closeDetail()">✕</div>
+        <div class="detail-content" id="detailContent">
+            <!-- Content will be injected via JS -->
+        </div>
+    </div>
+    
+    <!-- Filters -->
+    <div class="filter-tabs">
+        <a href="?status=bekliyor" class="filter-tab {% if selected_status == 'bekliyor' %}active{% endif %}">Bekleyenler</a>
+        <a href="?status=onaylandi" class="filter-tab {% if selected_status == 'onaylandi' %}active{% endif %}">Onaylananlar</a>
+        <a href="?status=reddedildi" class="filter-tab {% if selected_status == 'reddedildi' %}active{% endif %}">Reddedilenler</a>
+        <a href="?status=all" class="filter-tab {% if selected_status == 'all' %}active{% endif %}">Tümü</a>
+    </div>
+
+    {% if clubs %}
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+            {% for club in clubs %}
+            <div class="club-card" onclick="expandCard(this)"
+                 data-id="{{ club.id }}"
+                 data-ad="{{ club.ad }}"
+                 data-kategori="{{ club.kategori }}"
+                 data-aciklama="{{ club.aciklama }}"
+                 data-status="{{ club.durum }}"
+                 data-date="{{ club.olusturma_tarihi|date:'d.m.Y' }}"
+                 data-username="{{ club.kurucu_username }}"
+                 data-uyesayisi="{{ club.uyesayisi|default:'Belirtilmemiş' }}"
+                 data-faaliyetler="{{ club.faaliyetler|default:'-' }}"
+                 data-katki="{{ club.katki|default:'-' }}"
+                 data-iletisim="{{ club.iletisim_isim|default:'-' }}"
+                 data-email="{{ club.okul_mail|default:'-' }}">
+                 
+                <div class="club-header">
+                    <div>
+                        <div class="club-title">{{ club.ad }}</div>
+                        <div class="club-category">{{ club.kategori }}</div>
+                    </div>
+                    <div class="status-badge 
+                        {% if club.durum == 'bekliyor' %}status-pending
+                        {% elif club.durum == 'onaylandi' %}status-approved
+                        {% elif club.durum == 'reddedildi' %}status-rejected{% endif %}">
+                        {% if club.durum == 'bekliyor' %}Bekliyor
+                        {% elif club.durum == 'onaylandi' %}Onaylandı
+                        {% elif club.durum == 'reddedildi' %}Reddedildi{% endif %}
+                    </div>
+                </div>
+
+                <div class="club-desc">
+                    {{ club.aciklama|truncatechars:100 }}
+                </div>
+
+                <div class="club-footer">
+                    <div class="footer-info">
+                        <div class="footer-item">
+                            <span>👤</span> {{ club.kurucu_username }}
+                        </div>
+                        <div class="footer-item">
+                            <span>📅</span> {{ club.olusturma_tarihi|date:"d.m.Y" }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-overlay" onclick="event.stopPropagation()">
+                    <div class="btn-group">
+                        {% if club.durum == 'bekliyor' %}
+                            <form method="POST" action="{% url 'approve_club' club.id %}" style="flex: 1;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-approve" style="width: 100%;">✓ Onayla</button>
+                            </form>
+                            <form method="POST" action="{% url 'reject_club' club.id %}" style="flex: 1;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-reject" style="width: 100%;">✗ Reddet</button>
+                            </form>
+                        {% else %}
+                            <form method="POST" action="{% url 'delete_club' club.id %}" style="flex: 1;" onsubmit="return confirm('Bu kulübü silmek istediğinize emin misiniz?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-delete" style="width: 100%;">🗑️ Sil</button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div style="font-size: 48px; margin-bottom: 15px;">📭</div>
+            <p>Bu kategoride kulüp bulunmuyor</p>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    let activeCard = null;
+    let originalRect = null;
+    const overlay = document.getElementById('modalOverlay');
+    const detailCard = document.getElementById('detailCard');
+    const content = document.getElementById('detailContent');
+    const mainContent = document.querySelector('.main-content'); // Get container
+
+    function expandCard(card) {
+        activeCard = card;
+        originalRect = card.getBoundingClientRect();
+        
+        // Populate Content (Same as before)
+        const data = card.dataset;
+        // ... (Status logic same as before, keeping code brief for diff) ...
+        let statusHtml = '';
+        if(data.status === 'bekliyor') statusHtml = '<div class="status-badge status-pending">Bekliyor</div>';
+        else if(data.status === 'onaylandi') statusHtml = '<div class="status-badge status-approved">Onaylandı</div>';
+        else statusHtml = '<div class="status-badge status-rejected">Reddedildi</div>';
+
+        content.innerHTML = `
+            <div class="detail-header-section">
+                <div class="detail-title-large">${data.ad}</div>
+                <div class="detail-category-large">${data.kategori}</div>
+                <div style="margin-top: 15px;">
+                    ${statusHtml}
+                </div>
+            </div>
+
+            <div class="detail-content">
+                <div class="detail-grid">
+                    <!-- Left Column: Main Info -->
+                    <div>
+                        <div class="detail-box">
+                            <div class="detail-section-title">🎯 Kulüp Amacı</div>
+                            <div style="line-height: 1.6; color: #555;">${data.aciklama}</div>
+                        </div>
+
+                        <div class="detail-box">
+                            <div class="detail-section-title">📋 Faaliyet Planı & Katkı</div>
+                            <div style="margin-bottom: 20px;">
+                                <div style="font-weight: 600; margin-bottom: 8px;">Planlanan Faaliyetler:</div>
+                                <div style="line-height: 1.6; color: #555;">${data.faaliyetler}</div>
+                            </div>
+                            <div>
+                                <div style="font-weight: 600; margin-bottom: 8px;">Kampüse Katkısı:</div>
+                                <div style="line-height: 1.6; color: #555;">${data.katki}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Meta Info -->
+                    <div>
+                        <div class="detail-box">
+                            <div class="detail-section-title">👤 iletişim Bilgileri</div>
+                            <div class="info-row">
+                                <span class="info-label">Ad Soyad</span>
+                                <span class="info-value">${data.iletisim}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Kullanıcı</span>
+                                <span class="info-value">${data.username}</span>
+                            </div>
+                            <div class="info-row" style="border:none;">
+                                <span class="info-label">Email</span>
+                                <span class="info-value">${data.email}</span>
+                            </div>
+                        </div>
+
+                        <div class="detail-box">
+                            <div class="detail-section-title">📊 İstatistikler</div>
+                            <div class="info-row">
+                                <span class="info-label">Tahmini Üye</span>
+                                <span class="info-value">${data.uyesayisi}</span>
+                            </div>
+                            <div class="info-row" style="border:none;">
+                                <span class="info-label">Tarih</span>
+                                <span class="info-value">${data.date}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Calculate position relative to Main Content
+        const mainRect = mainContent.getBoundingClientRect();
+        const relativeTop = originalRect.top - mainRect.top;
+        const relativeLeft = originalRect.left - mainRect.left;
+
+        // Set Initial Position (Absolute relative to main-content)
+        detailCard.style.display = 'flex';
+        detailCard.style.top = relativeTop + 'px';
+        detailCard.style.left = relativeLeft + 'px';
+        detailCard.style.width = originalRect.width + 'px';
+        detailCard.style.height = originalRect.height + 'px';
+        detailCard.classList.remove('active', 'fullscreen');
+
+        // Trigger Transition
+        overlay.classList.add('active');
+        
+        // Force Reflow
+        void detailCard.offsetWidth;
+
+        // Expand to Fullscreen (constrained to content area) with PIXEL precision for smooth animation
+        // Calculate final dimensions to fill the main-content area
+        const finalWidth = mainContent.clientWidth;
+        const finalHeight = mainContent.clientHeight;
+
+        detailCard.style.top = '0px'; 
+        detailCard.style.left = '0px'; 
+        detailCard.style.width = finalWidth + 'px'; 
+        detailCard.style.height = finalHeight + 'px'; 
+        // Reset anchors to avoid conflict during animation
+        detailCard.style.right = 'auto';
+        detailCard.style.bottom = 'auto';
+        
+        detailCard.classList.add('fullscreen');
+        
+        // Disable body scroll to prevent double scrolling
+        document.body.style.overflow = 'hidden';
+        
+        setTimeout(() => {
+            detailCard.classList.add('active'); 
+        }, 300);
+    }
+
+    function closeDetail() {
+        if(!activeCard) return;
+
+        detailCard.classList.remove('active');
+        
+        // Re-enable body scroll
+        document.body.style.overflow = '';
+        
+        // Calculate original position again in case of scroll
+        const mainRect = mainContent.getBoundingClientRect();
+        // Recalculate original rect based on current card position (it might have moved with layout)
+        const currentCardRect = activeCard.getBoundingClientRect();
+        
+        const relativeTop = currentCardRect.top - mainRect.top;
+        const relativeLeft = currentCardRect.left - mainRect.left;
+
+        // Revert Size/Position relative to main-content
+        detailCard.classList.remove('fullscreen');
+        // Reset anchors
+        detailCard.style.right = 'auto';
+        detailCard.style.bottom = 'auto';
+        
+        detailCard.style.top = relativeTop + 'px';
+        detailCard.style.left = relativeLeft + 'px';
+        detailCard.style.width = currentCardRect.width + 'px';
+        detailCard.style.height = currentCardRect.height + 'px';
+        
+        overlay.classList.remove('active');
+
+        setTimeout(() => {
+            detailCard.style.display = 'none';
+            activeCard = null;
+        }, 400);
+    }
+
+    overlay.addEventListener('click', closeDetail);
+</script>
+{% endblock %}

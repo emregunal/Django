@@ -1,0 +1,380 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Randevu Yönetimi - Admin Panel{% endblock %}
+
+{% block nav_appointments %}active{% endblock %}
+{% block page_title %}Randevu Yönetimi{% endblock %}
+
+{% block extra_scripts %}
+    <script>
+        document.querySelector('.custom-select-wrapper').addEventListener('click', function() {
+            this.querySelector('.custom-select').classList.toggle('open');
+        });
+
+        for (const option of document.querySelectorAll(".custom-option")) {
+            option.addEventListener('click', function() {
+                if (!this.classList.contains('selected')) {
+                    this.parentNode.querySelector('.custom-option.selected')?.classList.remove('selected');
+                    this.classList.add('selected');
+                    this.closest('.custom-select').querySelector('.custom-select__trigger span').textContent = this.textContent;
+                    
+                    // Trigger Page Reload
+                    const instructor = this.getAttribute('data-value');
+                    window.location.href = `?status={{ status_filter }}&instructor=${instructor}`;
+                }
+            });
+        }
+
+        window.addEventListener('click', function(e) {
+            const select = document.querySelector('.custom-select');
+            if (!select.contains(e.target)) {
+                select.classList.remove('open');
+            }
+        });
+    </script>
+{% endblock %}
+{% block extra_styles %}
+    <style>
+        /* Filter Tabs */
+        .filter-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .filter-tab {
+            padding: 10px 20px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            text-decoration: none;
+            color: #666;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .filter-tab.active {
+            background: #e74c3c;
+            color: white;
+            border-color: #e74c3c;
+        }
+
+        /* Appointments Table */
+        .appointments-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .appointments-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .appointments-table th {
+            background: #f8f9fa;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .appointments-table td {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .appointments-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-approved {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-rejected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.3s;
+            margin-right: 5px;
+        }
+
+        .btn-approve {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-approve:hover {
+            background: #218838;
+        }
+
+        .btn-reject {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-reject:hover {
+            background: #c82333;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        /* Custom Dropdown Styles */
+        .custom-select-wrapper {
+            position: relative;
+            user-select: none;
+            width: 250px;
+        }
+        
+        .custom-select {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .custom-select__trigger {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #555;
+            height: 48px;
+            line-height: 48px;
+            background: #fff;
+            cursor: pointer;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        }
+
+        .custom-select__trigger:hover {
+            border-color: #b0bec5;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transform: translateY(-1px);
+        }
+
+        .custom-select.open .custom-select__trigger {
+            border-color: #e74c3c;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .custom-select__trigger span {
+             display: block; 
+             white-space: nowrap; 
+             overflow: hidden; 
+             text-overflow: ellipsis;
+        }
+
+        .arrow {
+            position: relative;
+            height: 10px;
+            width: 10px;
+            margin-left: 10px;
+        }
+        .arrow::before, .arrow::after {
+            content: "";
+            position: absolute;
+            bottom: 0px;
+            width: 0.15rem;
+            height: 100%;
+            transition: all 0.3s;
+        }
+        .arrow::before {
+            left: -2px;
+            transform: rotate(-45deg);
+            background-color: #666;
+        }
+        .arrow::after {
+            left: 2px;
+            transform: rotate(45deg);
+            background-color: #666;
+        }
+        .custom-select.open .arrow::before {
+            left: -2px;
+            transform: rotate(45deg);
+            background-color: #e74c3c;
+        }
+        .custom-select.open .arrow::after {
+            left: 2px;
+            transform: rotate(-45deg);
+            background-color: #e74c3c;
+        }
+
+        .custom-options {
+            position: absolute;
+            display: block;
+            top: 100%;
+            left: 0;
+            right: 0;
+            border: 1px solid #e74c3c;
+            border-top: 0;
+            border-radius: 0 0 12px 12px;
+            box-sizing: border-box;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            background: #fff;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transform: translateY(-10px);
+            z-index: 100;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .custom-select.open .custom-options {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: all;
+            transform: translateY(0);
+        }
+
+        .custom-option {
+            position: relative;
+            display: block;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #555;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-bottom: 1px solid #f5f7fa;
+        }
+
+        .custom-option:last-of-type {
+            border-bottom: 0;
+        }
+
+        .custom-option:hover {
+            background-color: #fceceb; /* Light red bg */
+            color: #e74c3c;
+            padding-left: 25px;
+        }
+
+        .custom-option.selected {
+            color: #fff;
+            background-color: #e74c3c;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <!-- Filters -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <div class="filter-tabs" style="margin-bottom: 0;">
+            <a href="?status=bekliyor&instructor={{ instructor_filter }}" class="filter-tab {% if status_filter == 'bekliyor' %}active{% endif %}">Bekleyen</a>
+            <a href="?status=onaylandi&instructor={{ instructor_filter }}" class="filter-tab {% if status_filter == 'onaylandi' %}active{% endif %}">Onaylanan</a>
+            <a href="?status=reddedildi&instructor={{ instructor_filter }}" class="filter-tab {% if status_filter == 'reddedildi' %}active{% endif %}">Reddedilen</a>
+            <a href="?status=all&instructor={{ instructor_filter }}" class="filter-tab {% if status_filter == 'all' %}active{% endif %}">Tümü</a>
+        </div>
+        
+        <div class="custom-select-wrapper">
+            <div class="custom-select">
+                <div class="custom-select__trigger">
+                    <span>
+                        {% if instructor_filter and instructor_filter != 'all' %}
+                            {{ instructor_filter }}
+                        {% else %}
+                            Tüm Öğretmenler
+                        {% endif %}
+                    </span>
+                    <div class="arrow"></div>
+                </div>
+                <div class="custom-options">
+                    <span class="custom-option {% if instructor_filter == 'all' or not instructor_filter %}selected{% endif %}" data-value="all">Tüm Öğretmenler</span>
+                    {% for instructor in instructors %}
+                    <span class="custom-option {% if instructor_filter == instructor %}selected{% endif %}" data-value="{{ instructor }}">{{ instructor }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Appointments Table -->
+    <div class="appointments-card">
+        {% if appointments %}
+        <table class="appointments-table">
+            <thead>
+                <tr>
+                    <th>Öğrenci</th>
+                    <th>Öğretmen</th>
+                    <th>Tarih & Saat</th>
+                    <th>Konu</th>
+                    <th>Durum</th>
+                    <th>İşlemler</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for appointment in appointments %}
+                <tr>
+                    <td>{{ appointment.ogrenci_username }}</td>
+                    <td>{{ appointment.ogretmen_adi }}</td>
+                    <td>{{ appointment.tarih }}<br>{{ appointment.baslangic_saati }} - {{ appointment.bitis_saati }}</td>
+                    <td>{{ appointment.konu }}</td>
+                    <td>
+                        <span class="status-badge status-{{ appointment.durum }}">
+                            {% if appointment.durum == 'bekliyor' %}Bekliyor
+                            {% elif appointment.durum == 'onaylandi' %}Onaylandı
+                            {% elif appointment.durum == 'reddedildi' %}Reddedildi
+                            {% endif %}
+                        </span>
+                    </td>
+                    <td>
+                        {% if appointment.durum == 'bekliyor' %}
+                        <form method="POST" action="{% url 'approve_appointment' appointment.id %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-approve">✓ Onayla</button>
+                        </form>
+                        <form method="POST" action="{% url 'reject_appointment' appointment.id %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-reject">✗ Reddet</button>
+                        </form>
+                        {% else %}
+                        <span style="color: #999;">-</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <div style="font-size: 48px; margin-bottom: 15px;">📭</div>
+            <p>Bu kategoride randevu bulunmuyor</p>
+        </div>
+        {% endif %}
+    </div>
+{% endblock %}

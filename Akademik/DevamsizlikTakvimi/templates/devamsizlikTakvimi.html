@@ -376,6 +376,7 @@
 {% endblock %}
 
 {% block extra_scripts %}
+<script>
     // Animate progress bars on load
     window.addEventListener('load', () => {
         document.querySelectorAll('.attendance-fill').forEach(bar => {
@@ -386,4 +387,5 @@
             }, 100);
         });
     });
+</script>
 {% endblock %}

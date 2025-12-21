@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profilim - Öğretim Görevlisi Paneli</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        .admin-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(180deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            padding: 30px 0;
+            position: fixed;
+            height: 100vh;
+        }
+
+        .sidebar-header {
+            padding: 0 20px 30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 30px;
+        }
+
+        .sidebar-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .sidebar-subtitle {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        .sidebar-role {
+            font-size: 11px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 10px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 8px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 5px;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .main-content {
+            margin-left: 250px;
+            flex: 1;
+            padding: 30px;
+        }
+
+        .top-bar {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .page-title {
+            font-size: 24px;
+            color: #333;
+        }
+
+        .profile-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .profile-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .profile-card.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: white;
+        }
+
+        .profile-name {
+            font-size: 28px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .profile-title {
+            font-size: 16px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .info-item {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: #999;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 16px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .stat-card.pending .stat-number {
+            color: #f39c12;
+        }
+
+        .stat-card.approved .stat-number {
+            color: #27ae60;
+        }
+
+        .stat-card.rejected .stat-number {
+            color: #e74c3c;
+        }
+
+        @media (max-width: 768px) {
+            .profile-container {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .instructor-badge {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .instructor-badge:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+            color: #333;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .btn-save {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .btn-save:hover {
+            background: #219a52;
+            transform: translateY(-2px);
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        /* User Menu Dropdown */
+        .user-menu {
+            position: relative;
+        }
+
+        .user-menu-trigger {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 200px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.15);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 100;
+            margin-top: 15px;
+            border: 1px solid #eee;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+
+        .user-dropdown.show {
+            display: flex;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .user-dropdown a {
+            padding: 12px 20px;
+            text-decoration: none;
+            color: #333;
+            transition: all 0.2s;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid #f5f7fa;
+        }
+
+        .user-dropdown a:last-child {
+            border-bottom: none;
+        }
+
+        .user-dropdown a:hover {
+            background: #f8f9fa;
+            color: #3498db;
+            padding-left: 25px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="admin-layout">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">Öğretim Paneli</div>
+                <div class="sidebar-subtitle">{{ admin_username }}</div>
+                <div class="sidebar-role">Öğretim Görevlisi</div>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="{% url 'instructor_appointments' %}">📋 Randevularım</a></li>
+                <li><a href="{% url 'instructor_appointments_table' %}">📊 Randevu Tablosu</a></li>
+            </ul>
+        </div>
+
+        <div class="main-content">
+            <div class="top-bar">
+                <h1 class="page-title">👤 Profilim</h1>
+                <div class="user-menu">
+                    <div class="user-menu-trigger" onclick="toggleUserMenu()">
+                        <span class="instructor-badge">{{ ogretmen_adi }} ▼</span>
+                    </div>
+                    <div class="user-dropdown" id="userDropdown">
+                        <a href="{% url 'instructor_profile' %}">👤 Profilim</a>
+                        <a href="{% url 'admin_logout' %}" style="color: #e74c3c;">🚪 Çıkış Yap</a>
+                    </div>
+                </div>
+            </div>
+
+            {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="profile-container">
+                <div class="profile-card full-width">
+                    <div class="profile-header">
+                        <div class="profile-avatar">👤</div>
+                        <div>
+                            <div class="profile-name">{{ ogretmen_adi }}</div>
+                            <div class="profile-title">Öğretim Görevlisi</div>
+                        </div>
+                    </div>
+
+                    <h3 class="section-title">📊 Randevu İstatistikleri</h3>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-number">{{ stats.total }}</div>
+                            <div class="stat-label">Toplam Randevu</div>
+                        </div>
+                        <div class="stat-card pending">
+                            <div class="stat-number">{{ stats.pending }}</div>
+                            <div class="stat-label">Bekleyen</div>
+                        </div>
+                        <div class="stat-card approved">
+                            <div class="stat-number">{{ stats.approved }}</div>
+                            <div class="stat-label">Onaylanan</div>
+                        </div>
+                        <div class="stat-card rejected">
+                            <div class="stat-number">{{ stats.rejected }}</div>
+                            <div class="stat-label">Reddedilen</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-card">
+                    <h3 class="section-title">📝 Kişisel Bilgiler</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Ad Soyad</div>
+                            <div class="info-value">{{ ogretmen_adi }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">E-posta</div>
+                            <div class="info-value">{{ admin_username }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Kullanıcı Adı</div>
+                            <div class="info-value">{{ admin_username }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Hesap Durumu</div>
+                            <div class="info-value" style="color: #27ae60;">✓ Aktif</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-card">
+                    <h3 class="section-title">🏫 Akademik Bilgiler</h3>
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <div class="info-label">Bölüm</div>
+                                <input type="text" name="bolum" class="form-control"
+                                    value="{% if ogretmen %}{{ ogretmen.bolum }}{% endif %}"
+                                    placeholder="Bölüm girilmemiş">
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Ünvan (Değiştirilemez)</div>
+                                <div class="info-value" style="padding: 10px 0; color: #666;">{{ ogretmen_unvan }}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Ofis</div>
+                                <input type="text" name="ofis" class="form-control"
+                                    value="{% if ogretmen %}{{ ogretmen.ofis }}{% endif %}"
+                                    placeholder="Ofis girilmemiş">
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Telefon</div>
+                                <input type="text" name="telefon" class="form-control"
+                                    value="{% if ogretmen %}{{ ogretmen.telefon }}{% endif %}"
+                                    placeholder="Telefon girilmemiş">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-save">💾 Değişiklikleri Kaydet</button>
+                    </form>
+                    <a href="{% url 'instructor_change_password' %}"
+                        style="display: block; text-align: center; margin-top: 15px; color: #3498db; text-decoration: none; font-size: 14px;">🔐
+                        Şifremi Değiştir</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleUserMenu() {
+            const menu = document.getElementById('userDropdown');
+            menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+            if (menu.style.display === 'flex') {
+                setTimeout(() => {
+                    menu.classList.add('show');
+                }, 10);
+            } else {
+                menu.classList.remove('show');
+            }
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function (event) {
+            const menu = document.getElementById('userDropdown');
+            const trigger = document.querySelector('.user-menu-trigger');
+            if (menu && trigger && !menu.contains(event.target) && !trigger.contains(event.target)) {
+                menu.classList.remove('show');
+                setTimeout(() => {
+                    menu.style.display = 'none';
+                }, 300);
+            }
+        });
+    </script>
+</body>
+
+</html>

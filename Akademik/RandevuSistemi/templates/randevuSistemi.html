@@ -433,6 +433,7 @@
 {% endblock %}
 
 {% block extra_scripts %}
+<script>
     // Wait for DOM to be fully loaded
     document.addEventListener('DOMContentLoaded', function() {
         console.log('Script loaded');
@@ -478,4 +479,5 @@
             });
         }
     });
+</script>
 {% endblock %}

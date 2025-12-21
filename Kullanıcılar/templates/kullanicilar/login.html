@@ -246,6 +246,46 @@
             text-decoration: underline;
         }
 
+        /* Admin panel button */
+        .admin-panel-section {
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .btn-admin {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(52, 73, 94, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-admin:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(52, 73, 94, 0.4);
+            background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%);
+        }
+
+        .btn-admin:active {
+            transform: translateY(0);
+        }
+
+        .admin-icon {
+            font-size: 16px;
+        }
+
         /* Loading animation */
         .btn-login.loading {
             pointer-events: none;
@@ -331,6 +371,13 @@
 
         <div class="forgot-password">
             <a href="#">Şifremi Unuttum</a>
+        </div>
+
+        <div class="admin-panel-section">
+            <a href="{% url 'admin_login' %}" class="btn-admin">
+                <span class="admin-icon">⚙️</span>
+                <span>Admin Paneli Girişi</span>
+            </a>
         </div>
     </div>
 

@@ -1,0 +1,301 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Etkinlik Yönetimi - Admin Panel{% endblock %}
+
+{% block nav_events %}active{% endblock %}
+{% block page_title %}Etkinlik Yönetimi{% endblock %}
+
+{% block extra_styles %}
+    <style>
+        /* Filter Tabs */
+        .filter-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .filter-tab {
+            padding: 10px 20px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            text-decoration: none;
+            color: #666;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .filter-tab.active {
+            background: #e74c3c;
+            color: white;
+            border-color: #e74c3c;
+        }
+
+        /* Events Grid */
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .event-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+
+        .event-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+
+        .event-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-bekliyor {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-onaylandi {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-reddedildi {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .event-info {
+            margin-bottom: 15px;
+        }
+
+        .event-info-item {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .event-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #d43f2f;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .add-event-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            height: 60px;
+            width: 60px;
+            /* Initial width */
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            border-radius: 30px;
+            /* Changed from 50% to accommodate rectangle */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            overflow: hidden;
+            z-index: 1000;
+        }
+
+        .add-event-btn .icon {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            right: 0;
+            transition: transform 0.4s ease;
+        }
+
+        .add-event-btn .icon::before,
+        .add-event-btn .icon::after {
+            content: '';
+            position: absolute;
+            background-color: white;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .add-event-btn .icon::before {
+            width: 24px;
+            height: 4px;
+        }
+
+        .add-event-btn .icon::after {
+            width: 4px;
+            height: 24px;
+        }
+
+        .add-event-btn .text {
+            opacity: 0;
+            white-space: nowrap;
+            font-weight: 600;
+            font-size: 16px;
+            margin-right: 50px;
+            /* Space for icon */
+            margin-left: 20px;
+            transform: translateX(20px);
+            transition: all 0.3s ease;
+        }
+
+        .add-event-btn:hover {
+            width: 200px;
+            /* Expanded width */
+        }
+
+        .add-event-btn:hover .text {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .add-event-btn:hover .icon {
+            transform: rotate(90deg);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="filter-tabs">
+        <a href="?status=all" class="filter-tab {% if status_filter == 'all' %}active{% endif %}">Tümü</a>
+        <a href="?status=bekliyor"
+            class="filter-tab {% if status_filter == 'bekliyor' %}active{% endif %}">Bekleyen</a>
+        <a href="?status=onaylandi"
+            class="filter-tab {% if status_filter == 'onaylandi' %}active{% endif %}">Onaylanan</a>
+        <a href="?status=reddedildi"
+            class="filter-tab {% if status_filter == 'reddedildi' %}active{% endif %}">Reddedilen</a>
+    </div>
+
+    {% if events %}
+    <div class="events-grid">
+        {% for event in events %}
+        <div class="event-card">
+            <div class="event-header">
+                <div class="event-title">{{ event.baslik }}</div>
+                <span class="status-badge status-{{ event.durum }}">
+                    {% if event.durum == 'bekliyor' %}Bekliyor
+                    {% elif event.durum == 'onaylandi' %}Onaylandı
+                    {% elif event.durum == 'reddedildi' %}Reddedildi
+                    {% endif %}
+                </span>
+            </div>
+            <div class="event-info">
+                <div class="event-info-item"><strong>📅</strong> {{ event.tarih }} - {{ event.saat }}</div>
+                <div class="event-info-item"><strong>📍</strong> {{ event.konum }}</div>
+                <div class="event-info-item"><strong>🏷️</strong> {{ event.kategori }}</div>
+                {% if admin_role == 'superadmin' %}
+                <div class="event-info-item"><strong>👤</strong> {{ event.olusturan }}</div>
+                {% endif %}
+            </div>
+            <div class="event-actions">
+                {% if admin_role == 'superadmin' and event.durum == 'bekliyor' %}
+                <form method="POST" action="{% url 'approve_event' event.id %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success">✓ Onayla</button>
+                </form>
+                <form method="POST" action="{% url 'reject_event' event.id %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">✗ Reddet</button>
+                </form>
+                {% endif %}
+                <a href="{% url 'edit_event' event.id %}" class="btn btn-secondary">✏️ Düzenle</a>
+                <form method="POST" action="{% url 'delete_event' event.id %}" style="display: inline;"
+                    onsubmit="return confirm('Bu etkinliği silmek istediğinize emin misiniz?')">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">🗑️ Sil</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div style="font-size: 48px; margin-bottom: 15px;">🎉</div>
+        <p>Henüz etkinlik bulunmuyor</p>
+    </div>
+    {% endif %}
+
+    <a href="{% url 'add_event' %}" class="add-event-btn">
+        <span class="text">Etkinlik Oluştur</span>
+        <div class="icon"></div>
+    </a>
+{% endblock %}

@@ -216,8 +216,10 @@
                 <div class="event-icon"></div>
                 <div class="event-content">
                     <div class="event-title">{{ etkinlik.baslik }}</div>
-                    <div class="event-date">{{ etkinlik.tarih|date:"d E Y, l" }}</div>
+                    <div class="event-date">{{ etkinlik.tarih }}</div>
+                    {% if etkinlik.aciklama %}
                     <div class="event-description">{{ etkinlik.aciklama }}</div>
+                    {% endif %}
                     {% if etkinlik.konum %}
                     <div class="event-location">{{ etkinlik.konum }}</div>
                     {% endif %}
@@ -249,10 +251,12 @@
         <div class="timeline-list">
             {% for sinav in sinavlar %}
             <div class="timeline-item">
-                <div class="timeline-date">{{ sinav.tarih|date:"d E Y" }}</div>
+                <div class="timeline-date">{{ sinav.tarih }}</div>
                 <div class="timeline-content">
                     <div class="timeline-title">{{ sinav.baslik }}</div>
+                    {% if sinav.aciklama %}
                     <div class="timeline-desc">{{ sinav.aciklama }}</div>
+                    {% endif %}
                 </div>
             </div>
             {% endfor %}
@@ -267,10 +271,12 @@
         <div class="timeline-list">
             {% for tatil in tatiller %}
             <div class="timeline-item holiday">
-                <div class="timeline-date">{{ tatil.tarih|date:"d E Y" }}</div>
+                <div class="timeline-date">{{ tatil.tarih }}</div>
                 <div class="timeline-content">
                     <div class="timeline-title">{{ tatil.baslik }}</div>
+                    {% if tatil.aciklama %}
                     <div class="timeline-desc">{{ tatil.aciklama }}</div>
+                    {% endif %}
                 </div>
             </div>
             {% endfor %}
@@ -285,10 +291,12 @@
         <div class="timeline-list">
             {% for etkinlik in diger %}
             <div class="timeline-item">
-                <div class="timeline-date">{{ etkinlik.tarih|date:"d E Y" }}</div>
+                <div class="timeline-date">{{ etkinlik.tarih }}</div>
                 <div class="timeline-content">
                     <div class="timeline-title">{{ etkinlik.baslik }}</div>
+                    {% if etkinlik.aciklama %}
                     <div class="timeline-desc">{{ etkinlik.aciklama }}</div>
+                    {% endif %}
                 </div>
             </div>
             {% endfor %}
