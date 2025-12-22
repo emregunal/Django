@@ -13,7 +13,6 @@ def randevu_listesi(request):
         action = request.POST.get('action')
         
         if action == 'create':
-            # Yeni randevu oluştur
             ogretmen_id = request.POST.get('ogretmen')
             tarih = request.POST.get('tarih')
             baslangic_saati = request.POST.get('baslangic_saati')
@@ -21,11 +20,9 @@ def randevu_listesi(request):
             konu = request.POST.get('konu')
             aciklama = request.POST.get('aciklama', '')
             
-            # Öğretmen bilgisini MongoDB'den al
             ogretmen = db.ogretmenler.find_one({'_id': ObjectId(ogretmen_id)})
             
             if ogretmen:
-                # Öğrenci adını session'dan veya kullanıcı adından al
                 ogrenci_adi = request.session.get('user_isim', request.session.get('user_username', 'Bilinmeyen'))
                 
                 db.randevular.insert_one({
@@ -51,7 +48,6 @@ def randevu_listesi(request):
             return redirect('randevu-sistemi')
             
         elif action == 'cancel':
-            # Randevuyu iptal et
             randevu_id = request.POST.get('randevu_id')
             db.randevular.update_one(
                 {'_id': ObjectId(randevu_id)},
@@ -61,7 +57,6 @@ def randevu_listesi(request):
             return redirect('randevu-sistemi')
             
         elif action == 'archive':
-            # Randevuyu arşivle
             randevu_id = request.POST.get('randevu_id')
             db.randevular.update_one(
                 {'_id': ObjectId(randevu_id)},
@@ -70,16 +65,13 @@ def randevu_listesi(request):
             messages.success(request, 'Randevu arşivlendi!')
             return redirect('randevu-sistemi')
     
-    # Öğrencinin randevularını getir
     randevular = list(db.randevular.find({'ogrenci_id': request.session.get('user_id')}))
     randevular = serialize_mongo_docs(randevular)
     
-    # Aktif ve geçmiş randevuları ayır
     aktif_randevular = []
     gecmis_randevular = []
     
     for randevu in randevular:
-        # Randevu objesi oluştur (template için)
         randevu_obj = {
             'id': randevu['id'],
             'ogretmen': {
@@ -102,7 +94,6 @@ def randevu_listesi(request):
         else:
             gecmis_randevular.append(randevu_obj)
     
-    # Tüm öğretmenleri getir
     ogretmenler_list = list(db.ogretmenler.find({'aktif': True}).sort('ad', 1))
     ogretmenler = []
     for ogr in ogretmenler_list:

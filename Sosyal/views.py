@@ -9,37 +9,29 @@ from django.views.decorators.csrf import csrf_exempt
 def etkinlikler(request):
     db = get_db()
     
-    # Kategori filtreleme
     kategori = request.GET.get('kategori')
-    query = {'durum': 'onaylandi'}  # Sadece onaylanan etkinlikler
+    query = {'durum': 'onaylandi'}
     if kategori:
         query['kategori'] = kategori
     
     etkinlik_listesi = list(db.etkinlikler.find(query).sort('tarih', -1))
     etkinlik_listesi = serialize_mongo_docs(etkinlik_listesi)
     
-    # Kullanıcı ID'sini al
     user_id = request.session.get('user_id')
     
-    # Etkinlik verilerini düzenle
     for etkinlik in etkinlik_listesi:
-        # Katılımcıları al
         katilimcilar = etkinlik.get('katilimcilar', [])
         
-        # Katılımcı sayısını hesapla
         etkinlik['katilimci_sayisi'] = len(katilimcilar)
         
-        # Kullanıcının katılım durumunu kontrol et
         etkinlik['katildi_mi'] = any(k.get('user_id') == user_id for k in katilimcilar)
         
-        # Tarih string'ini datetime objesine çevir
         if 'tarih' in etkinlik and isinstance(etkinlik['tarih'], str):
             try:
                 etkinlik['tarih'] = datetime.strptime(etkinlik['tarih'], '%Y-%m-%d').date()
             except (ValueError, TypeError):
                 etkinlik['tarih'] = None
         
-        # Saat string'lerini time objesine çevir
         for saat_field in ['baslangic_saati', 'bitis_saati']:
             if saat_field in etkinlik and isinstance(etkinlik[saat_field], str):
                 try:
@@ -56,16 +48,14 @@ def etkinlikler(request):
 def kulupler(request):
     db = get_db()
     
-    # Kategori filtreleme
     kategori = request.GET.get('kategori')
-    query = {'durum': 'onaylandi'} # Sadece onaylı kulüpleri göster
+    query = {'durum': 'onaylandi'}
     if kategori:
         query['kategori'] = kategori
     
     kulup_listesi = list(db.kulupler.find(query).sort('ad', 1))
     kulup_listesi = serialize_mongo_docs(kulup_listesi)
     
-    # Kullanıcının katılım durumunu kontrol et
     user_id = request.session.get('user_id')
     for kulup in kulup_listesi:
         uyeler = kulup.get('uyeler', [])
@@ -93,21 +83,17 @@ def kulup_katil(request, kulup_id):
             if not kulup:
                 return JsonResponse({'success': False, 'error': 'Kulüp bulunamadı'})
             
-            # Kullanıcı bilgilerini session'dan al
             user_id = request.session.get('user_id')
             user_username = request.session.get('user_username')
             
             if not user_id:
                 return JsonResponse({'success': False, 'error': 'Giriş yapmalısınız'})
             
-            # Üyeler listesini al
             uyeler = kulup.get('uyeler', [])
             
-            # Kullanıcı zaten üye mi kontrol et
             uye_mi = any(u.get('user_id') == user_id for u in uyeler)
             
             if uye_mi:
-                # Kullanıcı zaten üye, çıkar
                 db.kulupler.update_one(
                     {'_id': ObjectId(kulup_id)},
                     {'$pull': {'uyeler': {'user_id': user_id}}}
@@ -115,7 +101,6 @@ def kulup_katil(request, kulup_id):
                 katildi = False
                 uyeler = [u for u in uyeler if u.get('user_id') != user_id]
             else:
-                # Kullanıcıyı ekle
                 uye_data = {
                     'user_id': user_id,
                     'username': user_username,
@@ -143,7 +128,6 @@ def duyurular(request):
     db = get_db()
     import re
     
-    # Turkish month mapping for date parsing
     turkish_months = {
         'Ocak': 1, 'Şubat': 2, 'Mart': 3, 'Nisan': 4,
         'Mayıs': 5, 'Haziran': 6, 'Temmuz': 7, 'Ağustos': 8,
@@ -168,7 +152,6 @@ def duyurular(request):
     
     duyuru_listesi = []
     
-    # 1. Yaklaşan akademik takvim etkinlikleri
     akademik_etkinlikler = list(db.akademik_etkinlikler.find({'egitim_ogretim_yili': '2025-2026'}))
     bugun = datetime.now()
     for etk in akademik_etkinlikler:
@@ -191,7 +174,6 @@ def duyurular(request):
                 'tip': 'akademik'
             })
     
-    # 1b. Devamsızlık sınırı uyarıları (kullanıcıya özel)
     user_id = request.session.get('user_id')
     if user_id:
         dersler = list(db.dersler.find({'ogrenci_id': user_id}))
@@ -200,11 +182,9 @@ def duyurular(request):
             devamsiz_saat = ders.get('devamsiz_saat', 0)
             devam_zorunlulugu = ders.get('devam_zorunlulugu', 70)
             
-            # Kalan hak hesapla
             izin_verilen_devamsizlik = toplam_saat * (100 - devam_zorunlulugu) / 100
             kalan_hak = int(izin_verilen_devamsizlik - devamsiz_saat)
             
-            # Sınırı aştıysa veya çok yaklaştıysa uyarı ver
             if kalan_hak <= 0:
                 duyuru_listesi.append({
                     'id': str(ders.get('_id', '')),
@@ -226,7 +206,6 @@ def duyurular(request):
                     'tip': 'devamsizlik_uyari'
                 })
     
-    # 2. Onaylanan etkinlikleri duyuru olarak ekle
     etkinlikler = list(db.etkinlikler.find({'durum': 'onaylandi'}).sort('olusturma_tarihi', -1).limit(10))
     for etkinlik in etkinlikler:
         duyuru_listesi.append({
@@ -239,7 +218,6 @@ def duyurular(request):
             'tip': 'etkinlik'
         })
     
-    # 3. Onaylanan kulüpleri duyuru olarak ekle
     kulupler = list(db.kulupler.find({'durum': 'onaylandi'}).sort('olusturma_tarihi', -1).limit(10))
     for kulup in kulupler:
         uye_sayisi = len(kulup.get('uyeler', []))
@@ -253,7 +231,6 @@ def duyurular(request):
             'tip': 'kulup'
         })
     
-    # 4. Varsa duyurular koleksiyonundan da ekle
     duyurular_db = list(db.duyurular.find({}).sort('olusturma_tarihi', -1).limit(10))
     for duyuru in duyurular_db:
         duyuru_listesi.append({
@@ -266,10 +243,8 @@ def duyurular(request):
             'tip': 'duyuru'
         })
     
-    # Tarihe göre sırala (en yakından en uzağa - akademik için, diğerleri için tarihe göre)
     duyuru_listesi.sort(key=lambda x: x.get('olusturma_tarihi', datetime.now()), reverse=True)
     
-    # En yakın 2 akademik etkinliği ayrı listede tut (tarihe göre sıralı)
     akademik_duyurular = [d for d in duyuru_listesi if d.get('tip') == 'akademik']
     akademik_duyurular.sort(key=lambda x: x.get('olusturma_tarihi', datetime.now()))
     yaklasan_akademik = akademik_duyurular[:2]
@@ -295,21 +270,17 @@ def etkinlik_katil(request, etkinlik_id):
             if not etkinlik:
                 return JsonResponse({'success': False, 'error': 'Etkinlik bulunamadı'})
             
-            # Kullanıcı bilgilerini session'dan al
             user_id = request.session.get('user_id')
             user_username = request.session.get('user_username')
             
             if not user_id:
                 return JsonResponse({'success': False, 'error': 'Giriş yapmalısınız'})
             
-            # Katılımcılar listesini al
             katilimcilar = etkinlik.get('katilimcilar', [])
             
-            # Kullanıcı zaten katılmış mı kontrol et
             katildi_mi = any(k.get('user_id') == user_id for k in katilimcilar)
             
             if katildi_mi:
-                # Kullanıcı zaten katılmış, çıkar
                 db.etkinlikler.update_one(
                     {'_id': ObjectId(etkinlik_id)},
                     {'$pull': {'katilimcilar': {'user_id': user_id}}}
@@ -317,7 +288,6 @@ def etkinlik_katil(request, etkinlik_id):
                 katildi = False
                 katilimcilar = [k for k in katilimcilar if k.get('user_id') != user_id]
             else:
-                # Kullanıcıyı ekle
                 katilimci_data = {
                     'user_id': user_id,
                     'username': user_username,

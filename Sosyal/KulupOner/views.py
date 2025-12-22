@@ -10,7 +10,6 @@ def kulupOner(request):
         ad = request.POST.get('ad')
         kategori = request.POST.get('kategori')
         aciklama = request.POST.get('aciklama')
-        # Additional fields
         uyesayisi = request.POST.get('uyesayisi')
         faaliyetler = request.POST.get('faaliyetler')
         katki = request.POST.get('katki')
@@ -31,10 +30,9 @@ def kulupOner(request):
                 'kurucu_id': request.session.get('user_id'),
                 'kurucu_username': request.session.get('user_username'),
                 'uye_ids': [],
-                'durum': 'bekliyor', # Onay mekanizması için eklendi
+                'durum': 'bekliyor',
                 'olusturma_tarihi': datetime.now()
             })
-            # messages.success(request, 'Kulüp öneriniz başarıyla gönderildi!')
             return render(request, "kulupOner.html", {'success': True})
         except Exception as e:
             messages.error(request, f'Kulüp oluşturulurken bir hata oluştu: {str(e)}')

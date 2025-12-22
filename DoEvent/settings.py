@@ -60,8 +60,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'DoEvent.wsgi.application'
 
-# Database - SQLite for Django (users, auth, sessions)
-# MongoDB for application data (accessed via pymongo in views)
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -69,14 +67,12 @@ DATABASES = {
     }
 }
 
-# MongoDB connection for app data
 from pymongo import MongoClient
 
 MONGODB_URI = config('MONGODB_URI', default='mongodb://localhost:27017/')
 MONGODB_DB_NAME = config('MONGODB_DB_NAME', default='dogustansosyalDB')
 
 try:
-    # SSL sertifika doğrulamasını devre dışı bırak (development için)
     mongodb_client = MongoClient(MONGODB_URI, tlsAllowInvalidCertificates=True)
     mongodb_db = mongodb_client[MONGODB_DB_NAME]
     print(f"MongoDB baglantisi basarili: {MONGODB_DB_NAME}")

@@ -6,7 +6,6 @@ Run this script once to populate the database with initial users
 import os
 import django
 
-# Setup Django environment
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'DoEvent.settings')
 django.setup()
 
@@ -19,7 +18,6 @@ def create_initial_users():
     
     print("Creating initial users...")
     
-    # List of users to create
     users_to_create = [
         {
             'kullanici_adi': config('ADMIN_USERNAME_1', default='admin'),
@@ -68,13 +66,11 @@ def create_initial_users():
     for user_data in users_to_create:
         kullanici_adi = user_data['kullanici_adi']
         
-        # Check if user already exists
         if Kullanici.objects.filter(kullanici_adi=kullanici_adi).exists():
             print(f"[!] Kullanici zaten mevcut: {kullanici_adi}")
             skipped_count += 1
             continue
         
-        # Create new user
         kullanici = Kullanici(
             kullanici_adi=kullanici_adi,
             email=user_data['email'],
@@ -96,7 +92,6 @@ def create_initial_users():
     print(f"Atlanan kullanıcı: {skipped_count}")
     print(f"{'='*50}\n")
     
-    # Display all users
     print("Mevcut kullanicilar:")
     print(f"{'Kullanici Adi':<20} {'Rol':<20} {'E-posta':<30} {'Aktif'}")
     print("-" * 80)
@@ -115,7 +110,6 @@ def create_instructor_users_from_mongodb():
     
     db = get_db()
     
-    # Get all instructors from MongoDB
     ogretmenler = list(db.ogretmenler.find())
     
     if not ogretmenler:
@@ -136,19 +130,15 @@ def create_instructor_users_from_mongodb():
             skipped_count += 1
             continue
         
-        # Use email as username if available, otherwise use name
         kullanici_adi = email if email else ad.lower().replace(' ', '_')
         
-        # Password is the instructor's name
         sifre = ad
         
-        # Check if user already exists
         if Kullanici.objects.filter(kullanici_adi=kullanici_adi).exists():
             print(f"[!] Kullanici zaten mevcut: {kullanici_adi}")
             skipped_count += 1
             continue
         
-        # Create user
         kullanici = Kullanici.objects.create(
             kullanici_adi=kullanici_adi,
             email=email,
@@ -158,7 +148,6 @@ def create_instructor_users_from_mongodb():
         kullanici.set_password(sifre)
         kullanici.save()
         
-        # Update ogretmenler collection with kullanici_adi for linking
         db.ogretmenler.update_one(
             {'_id': ogretmen['_id']},
             {'$set': {'kullanici_adi': kullanici_adi}}

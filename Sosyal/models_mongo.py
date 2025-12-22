@@ -17,12 +17,12 @@ class Etkinlik(Document):
     baslik = StringField(max_length=200, required=True, verbose_name='Başlık')
     aciklama = StringField(required=True, verbose_name='Açıklama')
     kategori = StringField(max_length=20, choices=KATEGORI_SECENEKLERI, required=True, verbose_name='Kategori')
-    tarih = StringField(required=True, verbose_name='Tarih')  # DateField yerine string kullanacağız
+    tarih = StringField(required=True, verbose_name='Tarih')
     baslangic_saati = StringField(required=True, verbose_name='Başlangıç Saati')
     bitis_saati = StringField(required=True, verbose_name='Bitiş Saati')
     konum = StringField(max_length=200, required=True, verbose_name='Konum')
-    katilimci_ids = ListField(IntField(), verbose_name='Katılımcı IDs')  # User IDs listesi
-    olusturan_id = IntField(required=True, verbose_name='Oluşturan ID')  # User ID
+    katilimci_ids = ListField(IntField(), verbose_name='Katılımcı IDs')
+    olusturan_id = IntField(required=True, verbose_name='Oluşturan ID')
     olusturma_tarihi = DateTimeField(verbose_name='Oluşturma Tarihi')
     
     meta = {
@@ -53,8 +53,8 @@ class Kulup(Document):
     ad = StringField(max_length=200, required=True, verbose_name='Kulüp Adı')
     aciklama = StringField(required=True, verbose_name='Açıklama')
     kategori = StringField(max_length=20, choices=KATEGORI_SECENEKLERI, required=True, verbose_name='Kategori')
-    uye_ids = ListField(IntField(), verbose_name='Üye IDs')  # User IDs listesi
-    kurucu_id = IntField(required=True, verbose_name='Kurucu ID')  # User ID
+    uye_ids = ListField(IntField(), verbose_name='Üye IDs')
+    kurucu_id = IntField(required=True, verbose_name='Kurucu ID')
     olusturma_tarihi = DateTimeField(verbose_name='Oluşturma Tarihi')
     
     meta = {
@@ -84,7 +84,7 @@ class Duyuru(Document):
     baslik = StringField(max_length=200, required=True, verbose_name='Başlık')
     icerik = StringField(required=True, verbose_name='İçerik')
     kategori = StringField(max_length=20, choices=KATEGORI_SECENEKLERI, default='genel', verbose_name='Kategori')
-    yazar_id = IntField(required=True, verbose_name='Yazar ID')  # User ID
+    yazar_id = IntField(required=True, verbose_name='Yazar ID')
     olusturma_tarihi = DateTimeField(verbose_name='Oluşturma Tarihi')
     goruntulenme = IntField(default=0, verbose_name='Görüntülenme')
     

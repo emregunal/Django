@@ -28,7 +28,7 @@ class Devamsizlik(Document):
     Devamsızlık modeli - MongoEngine Document olarak yeniden yazıldı
     """
     ogrenci_id = IntField(required=True, verbose_name='Öğrenci ID')
-    ders_kodu = StringField(max_length=20, required=True, verbose_name='Ders Kodu')  # Ders referansı
+    ders_kodu = StringField(max_length=20, required=True, verbose_name='Ders Kodu')
     devamsiz_saat = IntField(default=0, verbose_name='Devamsız Kalınan Saat')
     tarih = StringField(verbose_name='Kayıt Tarihi')
     aciklama = StringField(verbose_name='Açıklama')
@@ -38,7 +38,7 @@ class Devamsizlik(Document):
         'collection': 'devamsizliklar',
         'ordering': ['-tarih'],
         'indexes': [
-            ('ogrenci_id', 'ders_kodu'),  # Composite index for uniqueness simulation
+            ('ogrenci_id', 'ders_kodu'),
             'ogrenci_id',
             'ders_kodu'
         ]

@@ -13,7 +13,6 @@ def devamsizlik_listesi(request):
         action = request.POST.get('action')
         
         if action == 'add_ders':
-            # Yeni ders ekle
             ders_adi = request.POST.get('ders_adi')
             devam_zorunlulugu = int(request.POST.get('devam_zorunlulugu', 70))
             haftalik_ders_saati = int(request.POST.get('haftalik_ders_saati', 3))
@@ -25,7 +24,7 @@ def devamsizlik_listesi(request):
                 'ders_kodu': ders_adi.upper(),
                 'devam_zorunlulugu': devam_zorunlulugu,
                 'haftalik_ders_saati': haftalik_ders_saati,
-                'toplam_saat': haftalik_ders_saati * 14,  # 14 hafta
+                'toplam_saat': haftalik_ders_saati * 14,
                 'devamsiz_saat': 0,
                 'olusturma_tarihi': datetime.now()
             })
@@ -33,7 +32,6 @@ def devamsizlik_listesi(request):
             return redirect('devamsizlikTakvimi')
             
         elif action == 'add_devamsizlik':
-            # Devamsızlık ekle/çıkar
             ders_id = request.POST.get('ders_id')
             devamsiz_saat = int(request.POST.get('devamsiz_saat', 0))
             
@@ -51,16 +49,13 @@ def devamsizlik_listesi(request):
             return redirect('devamsizlikTakvimi')
             
         elif action == 'delete_ders':
-            # Ders sil
             ders_id = request.POST.get('ders_id')
             db.dersler.delete_one({'_id': ObjectId(ders_id)})
             messages.success(request, 'Ders silindi!')
             return redirect('devamsizlikTakvimi')
     
-    # Öğrencinin derslerini getir
     dersler = list(db.dersler.find({'ogrenci_id': request.session.get('user_id')}))
     
-    # İstatistikleri hesapla
     ders_istatistikleri = []
     for ders in dersler:
         toplam_saat = ders.get('toplam_saat', ders.get('haftalik_ders_saati', 3) * 14)
@@ -69,7 +64,6 @@ def devamsizlik_listesi(request):
         devam_yuzdesi = round((katilim_saati / toplam_saat) * 100, 1) if toplam_saat > 0 else 100
         devam_zorunlulugu = ders.get('devam_zorunlulugu', 70)
         
-        # Kalan hak hesapla
         izin_verilen_devamsizlik = toplam_saat * (100 - devam_zorunlulugu) / 100
         kalan_hak = max(0, int(izin_verilen_devamsizlik - devamsiz_saat))
         
@@ -108,14 +102,12 @@ def devamsizlik_ekle(request):
         try:
             db = get_db()
             
-            # Aynı ders için kayıt var mı kontrol et
             existing = db.devamsizliklar.find_one({
                 'ogrenci_id': request.session.get('user_id'),
                 'ders_kodu': ders_kodu
             })
             
             if existing:
-                # Güncelle
                 db.devamsizliklar.update_one(
                     {'_id': existing['_id']},
                     {
@@ -128,7 +120,6 @@ def devamsizlik_ekle(request):
                 )
                 messages.success(request, 'Devamsızlık kaydı güncellendi!')
             else:
-                # Yeni kayıt
                 db.devamsizliklar.insert_one({
                     'ogrenci_id': request.session.get('user_id'),
                     'ogrenci_username': request.session.get('user_username'),

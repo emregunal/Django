@@ -8,37 +8,12 @@ def index(request):
     from Akademik.AkademikTakvim.models import AkademikEtkinlik
     from datetime import datetime, timedelta
     
-    # NOT: Devamsızlık modeli Django User kullanıyor, bizim Kullanici modeliyle uyumlu değil
-    # Şimdilik boş liste gösteriyoruz
     ders_istatistikleri = []
     
-    # Kullanıcının devamsızlık kayıtlarını getir, devam yüzdesine göre sırala (düşükten yükseğe)
-    # devamsizliklar = Devamsizlik.objects.filter(ogrenci=request.user).select_related('ders')
-    # 
-    # ders_istatistikleri = []
-    # for devamsizlik in devamsizliklar:
-    #     ders = devamsizlik.ders
-    #     toplam_saat = ders.toplam_ders_saati()
-    #     devam_yuzdesi = devamsizlik.devamsizlik_yuzdesi()
-    #     kalan_hak = devamsizlik.kalan_devamsizlik_hakki()
-    #     
-    #     ders_istatistikleri.append({
-    #         'ders': ders,
-    #         'devamsiz_saat': devamsizlik.devamsiz_saat,
-    #         'toplam_saat': toplam_saat,
-    #         'devam_yuzdesi': devam_yuzdesi,
-    #         'kalan_hak': kalan_hak,
-    #         'devam_zorunlulugu': ders.devam_zorunlulugu,
-    #     })
-    # 
-    # # Devam yüzdesine göre sırala (düşükten yükseğe)
-    # ders_istatistikleri.sort(key=lambda x: x['devam_yuzdesi'])
     
-    # Haftalık akademik takvim verileri (bu hafta - Pazartesi'den Pazar'a)
     bugun = datetime.now().date()
-    hafta_basi = bugun - timedelta(days=bugun.weekday())  # Pazartesi
+    hafta_basi = bugun - timedelta(days=bugun.weekday())
     
-    # Her gün için etkinlikleri hazırla
     gunler = []
     gun_isimleri = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar']
     
@@ -56,7 +31,7 @@ def index(request):
         })
     
     context = {
-        'ders_istatistikleri': ders_istatistikleri[:3],  # İlk 3 dersi göster
+        'ders_istatistikleri': ders_istatistikleri[:3],
         'gunler': gunler,
         'hafta_basi': hafta_basi,
     }

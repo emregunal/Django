@@ -6,7 +6,7 @@ from Kullanıcılar.models import Kullanici
 import json
 
 
-@csrf_exempt  # Postman'dan test ederken CSRF korumasını devre dışı bırakıyoruz
+@csrf_exempt
 def register_api(request):
     if request.method == 'POST':
         try:
@@ -15,18 +15,16 @@ def register_api(request):
             email = data.get('email')
             password = data.get('password')
             
-            # Kullanıcı adının benzersiz olduğunu kontrol et
             if Kullanici.objects.filter(kullanici_adi=username).exists():
                 return JsonResponse({
                     'status': 'error',
                     'message': 'Bu kullanıcı adı zaten kullanılıyor.'
                 }, status=400)
                 
-            # Kullanıcıyı oluştur
             kullanici = Kullanici(
                 kullanici_adi=username,
                 email=email,
-                rol='user',  # API'den kayıt olan kullanıcılar normal kullanıcı
+                rol='user',
                 aktif=True,
             )
             kullanici.set_password(password)
@@ -60,7 +58,6 @@ def register_api(request):
     }, status=405)
 
 def login_view(request):    
-    # Eğer kullanıcı zaten giriş yapmışsa ana sayfaya yönlendir
     if request.session.get('is_authenticated'):
         return redirect('index')
         
@@ -70,34 +67,27 @@ def login_view(request):
         
         if username and password:
             try:
-                # Kullanıcıyı veritabanından bul
                 kullanici = Kullanici.objects.get(kullanici_adi=username)
                 
-                # Şifreyi kontrol et
                 if kullanici.check_password(password):
-                    # Hesap aktif mi kontrol et
                     if not kullanici.aktif:
                         messages.error(request, 'Hesabınız devre dışı bırakılmış.')
                         return render(request, 'kullanicilar/login.html')
                     
-                    # Superadmin veya instructor için admin girişini kullan
                     if kullanici.rol in ['superadmin', 'instructor']:
                         messages.info(request, 'Admin paneli için admin girişini kullanın.')
                         return redirect('admin_login')
                     
-                    # Normal kullanıcılar ve kulüp başkanları için ana siteye giriş
-                    # Session'a kullanıcı bilgilerini kaydet
                     request.session['user_id'] = kullanici.id
                     request.session['user_username'] = kullanici.kullanici_adi
                     request.session['user_role'] = kullanici.rol
                     request.session['user_isim'] = kullanici.isim if kullanici.isim else kullanici.kullanici_adi
                     request.session['is_authenticated'] = True
                     
-                    # Son giriş zamanını güncelle
                     kullanici.update_last_login()
                     
                     messages.success(request, f'Hoş geldiniz, {kullanici.kullanici_adi}!')
-                    return redirect('index')  # Ana sayfaya yönlendir
+                    return redirect('index')
                 else:
                     messages.error(request, 'Geçersiz kullanıcı adı veya şifre.')
             
@@ -109,7 +99,6 @@ def login_view(request):
     return render(request, 'kullanicilar/login.html')
 
 def logout_view(request):
-    # Session'ı tamamen temizle
     request.session.flush()
     
     messages.success(request, 'Başarıyla çıkış yapıldı.')
@@ -118,7 +107,6 @@ def logout_view(request):
 
 def profile_view(request):
     """User profile page showing user information"""
-    # Check if user is logged in
     if not request.session.get('is_authenticated'):
         messages.error(request, 'Bu sayfayı görüntülemek için giriş yapmalısınız.')
         return redirect('kullanicilar:login')
@@ -129,22 +117,17 @@ def profile_view(request):
         kullanici = Kullanici.objects.get(id=user_id)
         
         if request.method == 'POST':
-            # Get form data
             new_username = request.POST.get('kullanici_adi', '').strip()
             new_isim = request.POST.get('isim', '').strip()
             new_bolum = request.POST.get('bolum', '').strip()
             
-            # Validate username
             if new_username and new_username != kullanici.kullanici_adi:
-                # Check if username is already taken
                 if Kullanici.objects.filter(kullanici_adi=new_username).exclude(id=user_id).exists():
                     messages.error(request, 'Bu kullanıcı adı zaten kullanılıyor.')
                     return redirect('kullanicilar:profile')
                 kullanici.kullanici_adi = new_username
-                # Update session
                 request.session['user_username'] = new_username
             
-            # Update other fields
             if new_isim:
                 kullanici.isim = new_isim
                 request.session['user_isim'] = new_isim

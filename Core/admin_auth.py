@@ -13,16 +13,12 @@ def authenticate_admin(username, password):
     try:
         kullanici = Kullanici.objects.get(kullanici_adi=username)
         
-        # Şifreyi kontrol et
         if not kullanici.check_password(password):
             return None
         
-        # Hesap aktif mi kontrol et
         if not kullanici.aktif:
             return None
         
-        # Sadece admin rollerine sahip kullanıcıların giriş yapmasına izin ver
-        # club_moderator artık ayrı kulüp panelini kullanıyor
         if kullanici.rol in ['superadmin', 'instructor', 'ogretmen']:
             return kullanici.rol
         
@@ -52,7 +48,6 @@ def superadmin_required(view_func):
         role = request.session.get('admin_role')
         if role != 'superadmin':
             messages.error(request, 'Bu sayfaya erişim yetkiniz yok. Sadece superadmin erişebilir.')
-            # Kulüp yetkilisi ise etkinliklere yönlendir
             if role == 'club_moderator':
                 return redirect('admin_events')
             return redirect('admin_login')

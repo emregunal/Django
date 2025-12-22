@@ -12,14 +12,12 @@ def get_db():
     if hasattr(settings, 'mongodb_db') and settings.mongodb_db is not None:
         return settings.mongodb_db
     else:
-        # Fallback: create connection if not exists
         from pymongo import MongoClient
         from decouple import config
         
         MONGODB_URI = config('MONGODB_URI')
         MONGODB_DB_NAME = config('MONGODB_DB_NAME', default='dogustansosyalDB')
         
-        # SSL sertifika doğrulamasını devre dışı bırak (development için)
         mongodb_client = MongoClient(MONGODB_URI, tlsAllowInvalidCertificates=True)
         return mongodb_client[MONGODB_DB_NAME]
 

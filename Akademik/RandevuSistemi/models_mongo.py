@@ -32,7 +32,7 @@ class Randevu(Document):
     ]
     
     ogrenci_id = IntField(required=True, verbose_name='Öğrenci ID')
-    ogretmen_id = IntField(required=True, verbose_name='Öğretmen ID')  # Ogretmen document ID
+    ogretmen_id = IntField(required=True, verbose_name='Öğretmen ID')
     tarih = StringField(required=True, verbose_name='Tarih')
     baslangic_saati = StringField(required=True, verbose_name='Başlangıç Saati')
     bitis_saati = StringField(required=True, verbose_name='Bitiş Saati')
